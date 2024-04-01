@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZB23_0205</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZB23_0205</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Program ZB23_0205</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZB23_0205</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zb23_0205.
+<font color ="#0000FF">* 1</font>
+<font color ="#0000FF">*1)</font>
+DATA : gs_scarr_a TYPE scarr.
+<font color ="#0000FF">*2)</font>
+DATA : gs_scarr_b TYPE zsscarr_b23.
+
+<font color ="#0000FF">* 2</font>
+<font color ="#0000FF">*TYPES : BEGIN OF ty_scarr_c,</font>
+<font color ="#0000FF">*          carrid TYPE S_CARR_ID,</font>
+<font color ="#0000FF">*          CARRNAME TYPE S_CARRNAME,</font>
+<font color ="#0000FF">*          CURRCODE TYPE S_CURRCODE,</font>
+<font color ="#0000FF">*          URL TYPE S_CARRURL,</font>
+<font color ="#0000FF">*        END OF  ty_scarr_c.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*DATA: gs_scarr_c TYPE ty_scarr_c.</font>
+
+<font color ="#0000FF">*TYPES : ty_scarr TYPE scarr.</font>
+DATA : gs_scarr_c TYPE ty_scarr.
+
+<font color ="#0000FF">* 3</font>
+DATA: BEGIN OF gs_scarr_d,
+        carrid   TYPE s_carr_id,
+        carrname TYPE s_carrname,
+        currcode TYPE s_currcode,
+        url      TYPE scarr-url,
+      END OF gs_scarr_d.
+
+
+
+<font color ="#0000FF">*gs_scarr_a-carrid = 'AA'.</font>
+<font color ="#0000FF">*gs_scarr_a-carrname = 'American Airline'.</font>
+<font color ="#0000FF">*gs_scarr_a-currcode = 'USD'.</font>
+<font color ="#0000FF">*gs_scarr_a-url = 'http://www.aa.com'.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*gs_scarr_b-carrid = gs_scarr_a-carrid.</font>
+<font color ="#0000FF">*gs_scarr_b-carrname = gs_scarr_a-carrname.</font>
+<font color ="#0000FF">*gs_scarr_b-currcode = gs_scarr_a-currcode.</font>
+<font color ="#0000FF">*gs_scarr_b-url = gs_scarr_a-url.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">**MOVE 'aa' TO  gs_scarr_a-carrid.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">**MOVE-CORRESPONDING 이름 같은것끼리 다 들어감</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*MOVE-CORRESPONDING gs_scarr_b TO gs_scarr_d.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*WRITE :/ gs_scarr_a.</font>
+<font color ="#0000FF">*WRITE :/4 gs_scarr_d.</font>
+
+TYPES ty_scarr TYPE scarr.
+DATA gt_scarr TYPE TABLE OF ty_scarr.
+DATA gs_scarr TYPE ty_scarr.
+
+gs_scarr-carrid = 'AB'.
+gs_scarr-carrname = 'American Ariline'.
+gs_scarr-currcode = 'USD'.
+gs_scarr-url = 'https://AA.com'.
+
+insert gs_scarr into table gt_scarr.
+<font color ="#0000FF">*clear gs_scarr.</font>
+
+gs_scarr-carrid = 'AB'.
+gs_scarr-carrname = 'Air Breilion'.
+gs_scarr-currcode = 'JPY'.
+<font color ="#0000FF">*gs_scarr-url = 'https://BBBt.com'.</font>
+
+insert gs_scarr into table gt_scarr.
+<font color ="#0000FF">*clear gs_scarr.</font>
+
+
+
+
+LOOP AT gt_scarr INTO gs_scarr.
+  WRITE: / gs_scarr-carrid,
+         /  gs_scarr-carrname,
+         /  gs_scarr-currcode,
+         /  gs_scarr-url.
+ENDLOOP.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

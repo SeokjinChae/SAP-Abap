@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>MZ_MODULE_POOL_B23_I01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: MZ_MODULE_POOL_B23_I01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include MZ_MODULE_POOL_B23_I01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          MZ_MODULE_POOL_B23_I01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+
+MODULE user_command_0100 INPUT.
+  CASE ok_code.
+    WHEN 'BACK'.
+      LEAVE TO SCREEN 0.
+    WHEN 'TIME'.
+      CALL SCREEN 150
+      STARTING AT 10 10
+      ENDING AT 50 20.
+    WHEN 'SAVE'.
+      MODIFY zflight_b23
+        FROM gs_sflight.
+      IF sy-subrc &lt;&gt; 0.
+        MESSAGE '저장 실패 ' TYPE 'W'.
+      ELSE.
+        MESSAGE '저장 성공 ' TYPE 'S'.
+      ENDIF.
+    WHEN 'FC1' OR 'FC2' OR 'FC3'.
+      my_tabstrip-activetab = ok_code.
+  ENDCASE.
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      Module  CHECK_SFLIGHT  INPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*       Read flight record from database</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+MODULE check_sflight INPUT.
+  "WA에 있는 값을 화면 요소(구조)로 전달
+  "화면의 carrid connid fldate를 조건으로 삼아 sflight 데이터 조회
+  SELECT SINGLE *
+    INTO CORRESPONDING FIELDS OF gs_sflight
+    FROM sflight  "internal table 활용
+    WHERE carrid = sdyn_conn-carrid
+      AND connid = sdyn_conn-connid
+      AND fldate = sdyn_conn-fldate.
+
+  CHECK sy-subrc &lt;&gt; 0. " 데이터가 존재하지않을 경우
+  CLEAR gs_sflight. "WA 초기화
+  MESSAGE i007(bc410).
+
+
+<font color ="#0000FF">*  MOVE-CORRESPONDING gs_sflight TO sdyn_conn. "direcet read</font>
+
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      Module  EXIT  INPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*       process EXIT functions (type 'E')</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+MODULE exit INPUT.
+  CASE ok_code.
+    WHEN 'CANCEL'."cancel - 취소/초기화
+      CLEAR: gs_sflight,
+             sdyn_conn,
+             saplane.
+      LEAVE TO SCREEN 100.
+    WHEN 'EXIT'. "exit - 나가기
+      LEAVE PROGRAM.
+  ENDCASE.
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      Module  CHECK_PLANETYPE  INPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*       text</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+MODULE check_planetype INPUT.
+  IF sdyn_conn-planetype IS INITIAL.
+    MESSAGE e555(bc410)  WITH 'Planetype type needed'(plt).
+  ENDIF.
+
+  SELECT SINGLE seatsmax
+    FROM saplane
+    INTO sdyn_conn-seatsmax
+    WHERE planetype = sdyn_conn-planetype.
+
+  IF sdyn_conn-seatsocc &gt; sdyn_conn-seatsmax.
+    MESSAGE e109(bc410).
+  ELSE.
+    MOVE-CORRESPONDING sdyn_conn TO gs_sflight.
+  ENDIF.
+
+  "MOVE-CORRESPONDING sdyn_conn TO gs_sflight.
+ENDMODULE.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

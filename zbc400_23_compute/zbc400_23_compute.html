@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZBC400_23_COMPUTE</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZBC400_23_COMPUTE</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Report ZBC400_23_COMPUTE</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZBC400_23_COMPUTE</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zbc400_23_compute.
+
+PARAMETERS : pa_int1 TYPE i,
+             pa_op   TYPE c LENGTH 1,
+             pa_int2 TYPE i.
+
+DATA gv_result TYPE p LENGTH 16 DECIMALS 2.
+
+IF ( pa_op = '+' OR
+pa_op = '-' OR
+pa_op = '*' OR
+pa_op = '/' AND pa_int2 &lt;&gt; 0 ).
+
+
+
+  CASE pa_op.
+    WHEN '+'.
+      gv_result = pa_int1 + pa_int2.
+
+    WHEN '-'.
+      gv_result = pa_int1 - pa_int2.
+
+    WHEN '*'.
+      gv_result = pa_int1 * pa_int2.
+
+    WHEN '/'.
+      gv_result = pa_int1 / pa_int2.
+
+  ENDCASE.
+
+  WRITE :'Result', gv_result.
+
+ELSEIF pa_op = '/' AND pa_int2 = 0.
+  WRITE TEXT-001.
+
+ELSE.
+  WRITE TEXT-002.
+
+ENDIF.
+
+<font color ="#0000FF">*Text elements</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* 001 0으로 나눌수 x</font>
+<font color ="#0000FF">* 002 다시 시도</font>
+
+
+<font color ="#0000FF">*Selection texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* PA_INT1         값1</font>
+<font color ="#0000FF">* PA_INT2         값2</font>
+<font color ="#0000FF">* PA_OP         기호</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

@@ -1,0 +1,504 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZTEST2_B23_F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZTEST2_B23_F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZTASK2_B23_F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+<font color ="#0000FF">***INCLUDE ZTEST2_B23_F01.</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data.
+
+  SELECT
+    a~carrid
+    a~carrname
+    b~connid
+    b~countryfr
+    b~countryto
+    c~fldate
+    c~customid
+    c~passname
+    c~bookid
+    c~order_date
+    c~smoker
+    c~cancelled
+    INTO CORRESPONDING FIELDS OF TABLE gt_flight
+    FROM scarr AS a INNER JOIN spfli AS b
+
+    ON a~carrid = b~carrid
+
+    INNER JOIN sbook AS c
+    ON a~carrid = c~carrid
+    AND c~connid = b~connid
+
+    WHERE a~carrid = pa_car AND
+          b~connid IN so_con AND
+          c~fldate IN so_fdt AND
+          c~customid IN so_cid AND
+          c~order_date IN so_odt.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_alv_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_alv_data .
+
+  LOOP AT gt_flight INTO gs_flight.
+    " 1) 라이트 적용
+    IF gs_flight-cancelled = 'X'.
+      gs_flight-light = '1'.
+      gs_flight-color ='C610'.
+    ELSE.
+      gs_flight-light = '3'.
+    ENDIF.
+
+    "2) status 설정
+    IF gs_flight-fldate &gt; sy-datum.
+      gs_flight-status = icon_space.
+    ELSE.
+      gs_flight-status = icon_okay.
+    ENDIF.
+
+    "cell color 적용
+    IF gs_flight-smoker = 'X'.
+      gs_field_color-fname = 'SMOKER'.
+      gs_field_color-color-col = col_group.
+      gs_field_color-color-int = 1.
+
+      APPEND gs_field_color TO gs_flight-cell_color.
+    ENDIF.
+
+    MODIFY gt_flight FROM gs_flight TRANSPORTING light status cell_color color.
+
+  ENDLOOP.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_display</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_display .
+
+  gs_layout-excp_fname = 'LIGHT'.
+  gs_layout-excp_led = 'X'.
+  gs_layout-ctab_fname = 'CELL_COLOR'.
+  gs_layout-info_fname = 'COLOR'.
+  gs_layout-zebra = 'X'.
+  gs_layout-cwidth_opt = 'X'.
+  gs_layout-sel_mode = 'D'.
+
+  gs_variant-report = sy-cprog. "프로그램 이름
+  gs_variant-variant = pa_lv.
+  gs_save = 'A'.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form sort_alv_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM sort_alv_data .
+
+  gs_sorting_criterion-fieldname = 'CUSTOMID'.
+  APPEND gs_sorting_criterion TO gt_sorting_criteria.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_field</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_field .
+
+
+  DATA : lt_fieldcat TYPE kkblo_t_fieldcat.
+
+  CALL FUNCTION 'K_KKB_FIELDCAT_MERGE'
+    EXPORTING
+      i_callback_program     = sy-repid
+      i_tabname              = 'GS_FLIGHT'
+      i_inclname             = sy-repid
+    CHANGING
+      ct_fieldcat            = lt_fieldcat
+    EXCEPTIONS
+      inconsistent_interface = 1
+      OTHERS                 = 2.
+
+  IF sy-subrc = 0.
+    CALL FUNCTION 'LVC_TRANSFER_FROM_KKBLO'
+      EXPORTING
+        it_fieldcat_kkblo = lt_fieldcat
+      IMPORTING
+        et_fieldcat_lvc   = gt_field_cat.
+
+  ENDIF.
+
+
+  LOOP AT gt_field_cat INTO gs_field_cat.
+
+    CASE gs_field_cat-fieldname.
+      WHEN 'LIGHT'.
+        gs_field_cat-coltext = '예약상태'.
+
+      WHEN 'STATUS'.
+        gs_field_cat-col_pos = 0.
+        gs_field_cat-coltext = '일정완료여부'.
+        gs_field_cat-just = 'C'. " L: LEFT, C:CENTER, R:RIGHT
+
+      WHEN 'SMOKER'.
+        gs_field_cat-col_pos = 8.
+        gs_field_cat-checkbox = 'X'.
+
+      WHEN 'CANCELLED'.
+        gs_field_cat-no_out = 'X'.
+
+      WHEN 'BOOKID'.
+        gs_field_cat-hotspot = 'X'.
+
+    ENDCASE.
+
+    MODIFY gt_field_cat FROM gs_field_cat.
+
+  ENDLOOP.
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_handler</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_handler .
+
+  SET HANDLER lcl_event_handler=&gt;handle_on_toolbar FOR go_grid.
+  SET HANDLER lcl_event_handler=&gt;handle_user_command FOR go_grid.
+  SET HANDLER lcl_event_handler=&gt;handle_hotspot_click FOR go_grid.
+  SET HANDLER lcl_event_handler=&gt;handle_double_click FOR go_grid.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form toolbar</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_OBJECT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM toolbar  USING  pv_object TYPE REF TO cl_alv_event_toolbar_set.
+
+  DATA ls_button TYPE stb_button.
+
+  "seperator
+  ls_button-butn_type = 3.
+  INSERT ls_button INTO TABLE pv_object-&gt;mt_toolbar.
+
+  "create button
+  CLEAR ls_button.
+  ls_button-function = 'REFRESH'.
+  ls_button-text = 'REFRESH'.
+  ls_button-icon = '@42@'.
+  ls_button-butn_type = 0.
+  INSERT ls_button INTO TABLE pv_object-&gt;mt_toolbar.
+
+  CLEAR ls_button.
+  ls_button-function = 'ONLY SMOKER'.
+  ls_button-text = 'ONLY SMOKER'.
+  ls_button-icon = '@L4@'.
+  ls_button-butn_type = 0.
+  INSERT ls_button INTO TABLE pv_object-&gt;mt_toolbar.
+
+  CLEAR ls_button.
+  ls_button-function = 'CANCELLED'.
+  ls_button-text = 'CANCELLED FLIGHT'.
+  ls_button-icon = '@0W@'.
+  ls_button-butn_type = 0.
+  INSERT ls_button INTO TABLE pv_object-&gt;mt_toolbar.
+
+ENDFORM.
+
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form user_command</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_UCOMM</font>
+<font color ="#0000FF">*&      --&gt; GV_ROWID</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM user_command  USING  pv_ucomm TYPE sy-ucomm.
+
+
+  CASE pv_ucomm.
+    WHEN 'REFRESH'.
+      CLEAR : gs_filter, gt_filter.
+
+    WHEN 'ONLY SMOKER'.
+      CLEAR : gs_filter, gt_filter.
+      gs_filter-fieldname = 'SMOKER'.
+      gs_filter-sign = 'I'.
+      gs_filter-option = 'EQ'.
+      gs_filter-low ='X'.
+      APPEND gs_filter TO gt_filter.
+
+    WHEN 'CANCELLED'.
+      CLEAR : gs_filter, gt_filter.
+      gs_filter-fieldname = 'CANCELLED'.
+      gs_filter-sign = 'I'.
+      gs_filter-option = 'EQ'.
+      gs_filter-low ='X'.
+      APPEND gs_filter TO gt_filter.
+  ENDCASE.
+
+  PERFORM call_alv_grid. "필터 적용후 원래 grid 화면 불러오기
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form hotspot_click</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_ROW_ID</font>
+<font color ="#0000FF">*&      --&gt; E_COLUMN_ID</font>
+<font color ="#0000FF">*&      --&gt; ES_ROW_NO</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM hotspot_click  USING    pv_row_id
+                             pv_column_id
+                             pv_row_no TYPE lvc_s_roid.
+
+<font color ="#0000FF">*  DATA : lv_bookings     TYPE c LENGTH 10,</font>
+<font color ="#0000FF">*         lv_message_text TYPE c LENGTH 60.</font>
+
+  CLEAR gs_flight.
+  READ TABLE gt_flight INTO gs_flight
+                       INDEX pv_row_no-row_id.
+
+  IF sy-subrc = 0.
+    MESSAGE i008 WITH gs_flight-fldate.
+  ELSE.
+    MESSAGE e001 DISPLAY LIKE 'E'.
+  ENDIF.
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form double_click</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_ROW</font>
+<font color ="#0000FF">*&      --&gt; E_COLUMN</font>
+<font color ="#0000FF">*&      --&gt; ES_ROW_NO</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM double_click  USING    pv_row
+                            pv_column
+                            pv_row_no TYPE lvc_s_roid.
+
+  READ TABLE gt_flight INTO gs_flight
+                       INDEX pv_row_no-row_id.
+  CLEAR gt_spfli.
+
+  SELECT cityfrom
+         airpfrom
+         cityto
+         airpto
+         deptime
+         arrtime
+         distance
+         FROM spfli
+         INTO CORRESPONDING FIELDS OF TABLE gt_spfli
+         WHERE carrid = gs_flight-carrid
+           AND connid = gs_flight-connid.
+
+  IF go_dialogbox IS INITIAL.
+
+    PERFORM set_dialog_object.
+    PERFORM display_dialog_grid.
+    PERFORM set_dialog_handler.
+
+  ELSE.
+    PERFORM refresh_alv_grid.
+
+  ENDIF.
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_dialog_object</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_dialog_object .
+
+  CREATE OBJECT go_dialogbox
+    EXPORTING
+      width   = 800
+      height  = 200
+      repid   = sy-repid
+      dynnr   = sy-dynnr
+      top     = 120
+      left    = 120
+      caption = 'Details'
+    EXCEPTIONS
+      OTHERS  = 0.
+
+  IF sy-subrc &lt;&gt; 0.
+
+  ENDIF.
+
+  CREATE OBJECT go_alv_booking
+    EXPORTING
+      i_parent = go_dialogbox
+    EXCEPTIONS
+      OTHERS   = 1.
+
+  IF sy-subrc &lt;&gt; 0.
+
+  ENDIF.
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_dialog_grid</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_dialog_grid .
+
+  DATA : lt_field_cat TYPE lvc_t_fcat,
+         ls_field_cat TYPE lvc_s_fcat.
+
+  ls_field_cat-col_pos = 1.
+  ls_field_cat-fieldname = 'CITYFROM'.
+  ls_field_cat-coltext = 'Depart.city'.
+  APPEND ls_field_cat TO lt_field_cat.
+
+  CLEAR ls_field_cat.
+  ls_field_cat-col_pos = 2.
+  ls_field_cat-fieldname = 'AIRPFROM'.
+  ls_field_cat-coltext = 'Dep. airport'.
+  APPEND ls_field_cat TO lt_field_cat.
+
+  CLEAR ls_field_cat.
+  ls_field_cat-col_pos = 3.
+  ls_field_cat-fieldname = 'CITYTO'.
+  ls_field_cat-coltext = 'Arrival city'.
+  APPEND ls_field_cat TO lt_field_cat.
+
+  CLEAR ls_field_cat.
+  ls_field_cat-col_pos = 4.
+  ls_field_cat-fieldname = 'AIRPTO'.
+  ls_field_cat-coltext = 'Dest. airport'.
+  APPEND ls_field_cat TO lt_field_cat.
+
+  CLEAR ls_field_cat.
+  ls_field_cat-col_pos = 5.
+  ls_field_cat-fieldname = 'DEPTIME'.
+  ls_field_cat-coltext = 'Departure'.
+  APPEND ls_field_cat TO lt_field_cat.
+
+  CLEAR ls_field_cat.
+  ls_field_cat-col_pos = 6.
+  ls_field_cat-fieldname = 'ARRTIME'.
+  ls_field_cat-coltext = 'Arrival Time'.
+  APPEND ls_field_cat TO lt_field_cat.
+
+  CLEAR ls_field_cat.
+  ls_field_cat-col_pos = 7.
+  ls_field_cat-fieldname = 'DISTANCE'.
+  ls_field_cat-coltext = 'Distance'.
+  APPEND ls_field_cat TO lt_field_cat.
+
+
+  CALL METHOD go_alv_booking-&gt;set_table_for_first_display
+    EXPORTING
+      i_structure_name = 'GS_SPFLI'
+    CHANGING
+      it_outtab        = gt_spfli
+      it_fieldcatalog  = lt_field_cat
+    EXCEPTIONS
+      OTHERS           = 0.
+
+  IF sy-subrc &lt;&gt; 0.
+
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form refresh_alv_grid</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM refresh_alv_grid .
+
+<font color ="#0000FF">*  PERFORM display_alv_data.</font>
+
+  CALL METHOD go_grid-&gt;refresh_table_display
+<font color ="#0000FF">*    EXPORTING</font>
+<font color ="#0000FF">*      is_stable      =</font>
+<font color ="#0000FF">*      i_soft_refresh =</font>
+<font color ="#0000FF">*    EXCEPTIONS</font>
+<font color ="#0000FF">*      finished       = 1</font>
+<font color ="#0000FF">*      others         = 2</font>
+    .
+  IF sy-subrc &lt;&gt; 0.
+<font color ="#0000FF">*   Implement suitable error handling here</font>
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_dialog_handler</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_dialog_handler .
+
+  SET HANDLER lcl_event_handler=&gt;handle_close FOR go_dialogbox.
+
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

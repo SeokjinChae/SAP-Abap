@@ -1,0 +1,91 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZB23_SPLIT_T01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZB23_SPLIT_T01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  SPLIT 컨네이너 ABAP2 시험 예제</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZB11_SPLIT_TOP</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+
+TABLES : sflight, scarr, sbook.
+
+DATA : BEGIN OF gs_flight,
+         carrid     LIKE sflight-carrid,
+
+         carrname   LIKE scarr-carrname,
+
+         connid     LIKE sflight-connid,
+         fldate     LIKE sflight-fldate,
+         price      LIKE sflight-price,
+         currency   LIKE sflight-currency,
+         paymentsum LIKE sflight-paymentsum,
+         planetype  LIKE sflight-planetype,
+         seatsmax   LIKE sflight-seatsmax,
+         seatsocc   LIKE sflight-seatsocc,
+         seatsmax_b LIKE sflight-seatsmax_b,
+         seatsocc_b LIKE sflight-seatsocc_b,
+         seatsmax_f LIKE sflight-seatsmax_f,
+         seatsocc_f LIKE sflight-seatsocc_f,
+       END OF gs_flight.
+
+DATA : gt_flight LIKE TABLE OF gs_flight.
+
+DATA : BEGIN OF gs_sbook,
+         bookid     LIKE sbook-bookid,
+         customid   LIKE sbook-customid,
+         luggweight LIKE sbook-luggweight,
+         wunit      LIKE sbook-wunit,
+         class      LIKE sbook-class,
+         loccuram   LIKE sbook-loccuram,
+         loccurkey  LIKE sbook-loccurkey,
+         order_date LIKE sbook-order_date,
+         agencynum  LIKE sbook-agencynum,
+         passname   LIKE sbook-passname,
+
+         cell_color TYPE lvc_t_scol,
+         smoker     LIKE sbook-smoker,
+         color      TYPE c LENGTH 4,
+         cancelled  LIKE sbook-cancelled,
+       END OF gs_sbook.
+
+DATA : gt_sbook LIKE TABLE OF gs_sbook.
+
+DATA ok_code LIKE sy-ucomm.
+
+DATA : gs_layout    TYPE lvc_s_layo,
+       gs_layout_02 TYPE lvc_s_layo.
+
+DATA : gs_field_color TYPE lvc_s_scol.
+
+DATA : gt_field_cat TYPE lvc_t_fcat,
+       gs_field_cat TYPE lvc_s_fcat.
+
+DATA : gt_field_cat_02 TYPE lvc_t_fcat,
+       gs_field_cat_02 TYPE lvc_s_fcat.
+
+
+DATA : go_dock_cont01 TYPE REF TO cl_gui_docking_container,
+       go_split       TYPE REF TO cl_gui_splitter_container.
+
+DATA : go_cont01 TYPE REF TO cl_gui_container,
+       go_cont02 TYPE REF TO cl_gui_container.
+
+DATA : go_grid01 TYPE REF TO cl_gui_alv_grid,
+       go_grid02 TYPE REF TO cl_gui_alv_grid.
+
+
+SELECT-OPTIONS : so_carr FOR sflight-carrid,
+                 so_conn FOR sflight-connid,
+                 so_fldt FOR sflight-fldate.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZBC430_23_STRUCT_NESTED</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZBC430_23_STRUCT_NESTED</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Program ZBC430_23_STRUCT_NESTED</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZBC430_23_STRUCT_NESTED</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zbc430_23_struct_nested.
+
+DATA gs_person TYPE zzperson_B23.
+
+START-OF-SELECTION.
+
+  gs_person-name-firstname = 'Harry'.
+  gs_person-name-lastname = 'Potter'.
+
+  gs_person-street = 'Privet Drive'.
+  gs_person-nr = '3'.
+  gs_person-zip = 'GB-10889'.
+  gs_person-city = 'London'.
+
+  WRITE: /  gs_person-name-firstname ,
+            gs_person-name-lastname ,
+            gs_person-street ,
+            gs_person-nr ,
+            gs_person-zip ,
+            gs_person-city .
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

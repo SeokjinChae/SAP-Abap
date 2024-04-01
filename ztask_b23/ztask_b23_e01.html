@@ -1,0 +1,46 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZTASK_B23_E01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZTASK_B23_E01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZTASK_B23_E01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZTASK_B23_E01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& AT SELECTION-SCREEN : SELECTION SCREEN '에서' 일어나는 이벤트</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*AT SELECTION-SCREEN.</font>
+<font color ="#0000FF">*  CASE sscrfields-ucomm. "사용자 func. code</font>
+<font color ="#0000FF">*    WHEN 'ADDINFO'. "PUSH BUTTON 클릭 이벤트</font>
+<font color ="#0000FF">*      "PUSH BUTTON FLAG 반전 + 텍스트 변경</font>
+<font color ="#0000FF">*      IF gv_switch = '1'.</font>
+<font color ="#0000FF">*        gv_switch = '0'.</font>
+<font color ="#0000FF">*        bt1 = TEXT-po2.</font>
+<font color ="#0000FF">*      ELSE.</font>
+<font color ="#0000FF">*        gv_switch = '1'.</font>
+<font color ="#0000FF">*        bt1 = TEXT-po1.</font>
+<font color ="#0000FF">*        REFRESH: so_cusid, so_odate. "비활성화일 경우, Select-Options 초기화</font>
+<font color ="#0000FF">*      ENDIF.</font>
+<font color ="#0000FF">*  ENDCASE.</font>
+<font color ="#0000FF">**&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">**& AT SELECTION-SCREEN OUTPUT : SELECTION SCREEN 갱신</font>
+<font color ="#0000FF">**&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*AT SELECTION-SCREEN OUTPUT.</font>
+<font color ="#0000FF">*  LOOP AT SCREEN.</font>
+<font color ="#0000FF">*    IF screen-group1 = 'ADD'. "추가정보 블록 그룹</font>
+<font color ="#0000FF">*      screen-active = gv_switch. "활성화 여부를 PUSH BUTTON FLAG로 지정</font>
+<font color ="#0000FF">*      MODIFY SCREEN.</font>
+<font color ="#0000FF">*    ENDIF.</font>
+<font color ="#0000FF">*  ENDLOOP.</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

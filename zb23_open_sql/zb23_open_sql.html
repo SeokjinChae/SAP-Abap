@@ -1,0 +1,180 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZB23_OPEN_SQL</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZB23_OPEN_SQL</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  OPEN_SQL PACKAGE SIZE / UP TO ROW</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZB11_OPEN_SQL</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT ZB23_OPEN_SQL.
+
+
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+<font color ="#0000FF">* 하나의 LINE을 읽어 올 경우 : SELECT SINGLE</font>
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+
+<font color ="#0000FF">*DATA : BEGIN OF gs_flight,</font>
+<font color ="#0000FF">*         carrid TYPE sflight-carrid,</font>
+<font color ="#0000FF">*         connid TYPE sflight-connid,</font>
+<font color ="#0000FF">*         fldate TYPE sflight-fldate,</font>
+<font color ="#0000FF">*       END OF gs_flight.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECT SINGLE carrid connid fldate</font>
+<font color ="#0000FF">**       INTO gs_flight "순서대로</font>
+<font color ="#0000FF">*       INTO CORRESPONDING FIELDS OF gs_flight "컬럼 이름 일치</font>
+<font color ="#0000FF">*       FROM sflight</font>
+<font color ="#0000FF">*       WHERE carrid = 'AA' AND</font>
+<font color ="#0000FF">*             connid = '0017' AND</font>
+<font color ="#0000FF">*             fldate = '20230817'.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*WRITE : 'Single Lines : ',</font>
+<font color ="#0000FF">*         gs_flight-carrid,</font>
+<font color ="#0000FF">*         gs_flight-connid,</font>
+<font color ="#0000FF">*         gs_flight-fldate.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*CLEAR gs_flight.</font>
+
+
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+<font color ="#0000FF">* 여러개의 LINE을 읽어 올 경우 : SELECT SINGLE</font>
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+
+<font color ="#0000FF">*DATA : gt_flight LIKE TABLE OF gs_flight.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECT carrid connid fldate</font>
+<font color ="#0000FF">**       INTO TABLE gt_flight " 컬럼 순서 & 형식</font>
+<font color ="#0000FF">*       INTO CORRESPONDING FIELDS OF TABLE gt_flight</font>
+<font color ="#0000FF">*       FROM sflight</font>
+<font color ="#0000FF">*       WHERE carrid = 'AA'.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*WRITE : 'Several Lines'.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*LOOP AT gt_flight INTO gs_flight.</font>
+<font color ="#0000FF">*  WRITE : / gs_flight-carrid,</font>
+<font color ="#0000FF">*            gs_flight-connid,</font>
+<font color ="#0000FF">*            gs_flight-fldate.</font>
+<font color ="#0000FF">*ENDLOOP.</font>
+
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+<font color ="#0000FF">* 데이터베이스 뷰 읽기 + salv object</font>
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+
+<font color ="#0000FF">*DATA : go_alv_grid TYPE REF TO cl_salv_table.</font>
+<font color ="#0000FF">*DATA : gt_flights TYPE TABLE OF dv_flights.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*"1)</font>
+<font color ="#0000FF">*SELECT * FROM dv_flights          "spfli + sflight</font>
+<font color ="#0000FF">*         INTO TABLE gt_flights</font>
+<font color ="#0000FF">*         WHERE carrid = 'AA'.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*"2)</font>
+<font color ="#0000FF">*SELECT * APPENDING TABLE gt_flights</font>
+<font color ="#0000FF">*        "INTO TABLE gt_flights</font>
+<font color ="#0000FF">*         FROM dv_flights          "spfli + sflight</font>
+<font color ="#0000FF">*         WHERE carrid = 'AZ'.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*" short form (ctrl + space로 찾아주면 됨)</font>
+<font color ="#0000FF">*" 출력하고자 하는 list data를 grid 형식으로 만들어주는 메소드</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*cl_salv_table=&gt;factory(</font>
+<font color ="#0000FF">*IMPORTING</font>
+<font color ="#0000FF">*  r_salv_table = go_alv_grid</font>
+<font color ="#0000FF">*CHANGING</font>
+<font color ="#0000FF">*   t_table = gt_flights ).</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*go_alv_grid-&gt;display( ).</font>
+
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+<font color ="#0000FF">* 동적으로 select할 컬럼 이름을 받아올 수도 있다. ( ) 괄호</font>
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+
+<font color ="#0000FF">*DATA : gt_flight LIKE TABLE OF sflight,</font>
+<font color ="#0000FF">*       gs_flight TYPE sflight.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*" 컬럼 이름을 받는 입력 변수</font>
+<font color ="#0000FF">**PARAMETERS : pa_line TYPE c LENGTH 72.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*DATA : pa_line TYPE c LENGTH 72.</font>
+<font color ="#0000FF">*DATA : gt_line LIKE TABLE OF pa_line.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*pa_line = 'CARRID'.</font>
+<font color ="#0000FF">*APPEND pa_line TO gt_line.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*pa_line = 'CONNID'.</font>
+<font color ="#0000FF">*APPEND pa_line TO gt_line.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECT (pa_line)</font>
+<font color ="#0000FF">*        INTO CORRESPONDING FIELDS OF TABLE gt_flight</font>
+<font color ="#0000FF">*        FROM sflight.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*IF sy-subrc = 0.</font>
+<font color ="#0000FF">*  LOOP AT gt_flight INTO gs_flight.</font>
+<font color ="#0000FF">*    WRITE : / gs_flight-carrid,</font>
+<font color ="#0000FF">*              gs_flight-connid,</font>
+<font color ="#0000FF">*              gs_flight-fldate,</font>
+<font color ="#0000FF">*              gs_flight-price,</font>
+<font color ="#0000FF">*              gs_flight-currency.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  ENDLOOP.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*ENDIF.</font>
+
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+<font color ="#0000FF">* PACKAGE SIZE -&gt; 인터널 테이블에 입력한다.</font>
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+
+<font color ="#0000FF">*DATA : gs_flight TYPE sflight,</font>
+<font color ="#0000FF">*       gt_flight LIKE TABLE OF gs_flight.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECT carrid connid</font>
+<font color ="#0000FF">**        INTO gs_flight "한건씩 select</font>
+<font color ="#0000FF">*       INTO CORRESPONDING FIELDS OF TABLE gt_flight "정해진 갯수만큼 select</font>
+<font color ="#0000FF">*       FROM spfli PACKAGE SIZE 5. "반드시 endselect 사용해야함</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  LOOP AT gt_flight INTO gs_flight.</font>
+<font color ="#0000FF">*    WRITE : / gs_flight-carrid,</font>
+<font color ="#0000FF">*              gs_flight-connid.</font>
+<font color ="#0000FF">*  ENDLOOP.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  ULINE.</font>
+<font color ="#0000FF">*ENDSELECT.</font>
+
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+<font color ="#0000FF">* UP TO ~ ROWS</font>
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+
+<font color ="#0000FF">*DATA : gs_flight TYPE sflight,</font>
+<font color ="#0000FF">*       gt_flight LIKE TABLE OF gs_flight.</font>
+
+"1) 입력변수 활용
+<font color ="#0000FF">*PARAMETERS : pa_table TYPE c LENGTH 10. "PARAMETER 값 입력시 반드시 대문자로 입력하여야 함</font>
+
+<font color ="#0000FF">*"2) 전역변수 활용</font>
+<font color ="#0000FF">*DATA : gv_table TYPE c LENGTH 10.</font>
+<font color ="#0000FF">*gv_table = 'SBOOK'.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECT * INTO CORRESPONDING FIELDS OF TABLE gt_flight</font>
+<font color ="#0000FF">*         INTO TABLE gt_flight</font>
+<font color ="#0000FF">*         FROM (pa_table) UP TO 10 ROWS</font>
+<font color ="#0000FF">*         FROM (gv_table) UP TO 10 ROWS</font>
+<font color ="#0000FF">*         WHERE carrid = 'AA'.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* 최대 라인수로 지정하기 위해 UP TO ~ ROWS 사용. 최대 적중수를 제한하는 용도로 많이 사용됨.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*LOOP AT gt_flight INTO gs_flight.</font>
+<font color ="#0000FF">*  WRITE : / gs_flight-carrid, gs_flight-connid.</font>
+<font color ="#0000FF">*ENDLOOP.</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

@@ -1,0 +1,383 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZB23_SPLIT_F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZB23_SPLIT_F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZB11_SPLIT_F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZB11_SPLIT_F01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data .
+
+  " 1. sflight + scarr
+  SELECT
+    a~carrid
+
+    b~carrname
+
+    a~connid
+    a~fldate
+    a~price
+    a~currency
+    a~paymentsum
+    a~planetype
+    a~seatsmax
+    a~seatsocc
+    a~seatsmax_b
+    a~seatsocc_b
+    a~seatsmax_f
+    a~seatsocc_f
+    INTO CORRESPONDING FIELDS OF TABLE gt_flight
+    FROM sflight AS a INNER JOIN scarr AS b
+    ON a~carrid = b~carrid
+    WHERE a~carrid IN so_carr
+      AND a~connid IN so_conn
+      AND a~fldate IN so_fldt.
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_field_01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_field_01 .
+
+  DATA : lt_fieldcat TYPE kkblo_t_fieldcat.
+
+  CALL FUNCTION 'K_KKB_FIELDCAT_MERGE'
+    EXPORTING
+      i_callback_program     = sy-repid
+      i_tabname              = 'GS_FLIGHT'
+      i_inclname             = sy-repid
+    CHANGING
+      ct_fieldcat            = lt_fieldcat
+    EXCEPTIONS
+      inconsistent_interface = 1
+      OTHERS                 = 2.
+
+  IF sy-subrc = 0.
+    CALL FUNCTION 'LVC_TRANSFER_FROM_KKBLO'
+      EXPORTING
+        it_fieldcat_kkblo = lt_fieldcat
+      IMPORTING
+        et_fieldcat_lvc   = gt_field_cat.
+
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_field_cat</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_field_cat .
+
+  LOOP AT gt_field_cat INTO gs_field_cat.
+
+    CASE gs_field_cat-fieldname.
+      WHEN 'CARRNAME'.
+        gs_field_cat-coltext = 'Airline Name'.  "필드 이름 설정
+
+      WHEN 'CARRID'.
+        gs_field_cat-coltext = 'Airline Code'.
+
+      WHEN 'CONNID'.
+        gs_field_cat-coltext = 'Flight Connection Number'.
+        gs_field_cat-lzero = 'X'.
+
+      WHEN 'FLDATE'.
+        gs_field_cat-coltext = 'Flight Date'.
+
+      WHEN 'PRICE'.
+        gs_field_cat-coltext = 'Airfare'.
+
+      WHEN 'CURRENCY'.
+        gs_field_cat-coltext = 'Currency'.
+
+      WHEN 'PAYMENTSUM'.
+        gs_field_cat-coltext = 'Total of current bookings'.
+
+      WHEN 'PLANETYPE'.
+        gs_field_cat-coltext = 'Aircraft Type'.
+
+      WHEN 'SEATSMAX'.
+        gs_field_cat-coltext = 'Capacity[E]'.
+      WHEN 'SEATSOCC'.
+        gs_field_cat-coltext = 'Occupied[E]'.
+
+      WHEN 'SEATSMAX_B'.
+        gs_field_cat-coltext = 'Capacity[B]'.
+
+      WHEN 'SEATSOCC_B'.
+        gs_field_cat-coltext = 'Occupied[B]'.
+
+      WHEN 'SEATSMAX_F'.
+        gs_field_cat-coltext = 'Capacity[F]'.
+
+      WHEN 'SEATSOCC_F'.
+        gs_field_cat-coltext = 'Occupied[F]'.
+
+    ENDCASE.
+
+    MODIFY gt_field_cat FROM gs_field_cat.
+
+  ENDLOOP.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_display_01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_display_01 .
+
+  gs_layout-grid_title = '항공편 정보'.
+  gs_layout-smalltitle = 'X'.
+  gs_layout-sel_mode = 'A'.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form double_click</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_ROW</font>
+<font color ="#0000FF">*&      --&gt; E_COLUMN</font>
+<font color ="#0000FF">*&      --&gt; ES_ROW_NO</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM double_click  USING    pv_row TYPE lvc_s_row
+                            pv_column
+                            pv_row_no TYPE lvc_s_roid.
+
+  READ TABLE gt_flight INTO gs_flight INDEX pv_row_no-row_id.
+
+  " 2. sbook
+  SELECT * FROM sbook
+           INTO CORRESPONDING FIELDS OF TABLE gt_sbook
+           WHERE carrid = gs_flight-carrid
+           AND connid = gs_flight-connid
+           AND fldate = gs_flight-fldate.
+
+  LOOP AT gt_sbook INTO gs_sbook.
+
+    IF gs_sbook-smoker = 'X'.
+      gs_field_color-fname = 'CUSTOMID'.
+      gs_field_color-color-col = col_negative.
+      gs_field_color-color-int = 0.
+      gs_field_color-color-inv = 0.
+
+      APPEND gs_field_color TO gs_sbook-cell_color.
+    ENDIF.
+
+    IF gs_sbook-cancelled = 'X'.
+      gs_sbook-color ='C701'.
+
+    ENDIF.
+
+    MODIFY gt_sbook FROM gs_sbook TRANSPORTING cell_color color.
+
+  ENDLOOP.
+
+  PERFORM set_field_02.
+  PERFORM set_field_cat_02.
+  PERFORM set_display_02.
+  PERFORM call_alv_02.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form call_alv_02</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM call_alv_02 .
+
+  CALL METHOD go_grid02-&gt;set_table_for_first_display
+    EXPORTING
+      i_buffer_active    = 'X'
+      i_bypassing_buffer = 'X'
+<font color ="#0000FF">*     i_consistency_check           =</font>
+<font color ="#0000FF">*     i_structure_name   = 'SBOOK'</font>
+<font color ="#0000FF">*     is_variant         =</font>
+      i_save             = 'A'
+<font color ="#0000FF">*     i_default          = 'X'</font>
+      is_layout          = gs_layout_02
+<font color ="#0000FF">*     is_print           =</font>
+<font color ="#0000FF">*     it_special_groups  =</font>
+<font color ="#0000FF">*     it_toolbar_excluding          =</font>
+<font color ="#0000FF">*     it_hyperlink       =</font>
+<font color ="#0000FF">*     it_alv_graphics    =</font>
+<font color ="#0000FF">*     it_except_qinfo    =</font>
+<font color ="#0000FF">*     ir_salv_adapter    =</font>
+    CHANGING
+      it_outtab          = gt_sbook[]
+      it_fieldcatalog    = gt_field_cat_02.
+<font color ="#0000FF">*    it_sort                       =</font>
+<font color ="#0000FF">*    it_filter                     =</font>
+<font color ="#0000FF">*  EXCEPTIONS</font>
+<font color ="#0000FF">*    invalid_parameter_combination = 1</font>
+<font color ="#0000FF">*    program_error                 = 2</font>
+<font color ="#0000FF">*    too_many_lines                = 3</font>
+<font color ="#0000FF">*    others                        = 4</font>
+
+  IF sy-subrc &lt;&gt; 0.
+
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_field_02</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_field_02 .
+
+  DATA : lt_fieldcat TYPE kkblo_t_fieldcat.
+
+  CALL FUNCTION 'K_KKB_FIELDCAT_MERGE'
+    EXPORTING
+      i_callback_program     = sy-repid
+      i_tabname              = 'GS_SBOOK'
+      i_inclname             = sy-repid
+    CHANGING
+      ct_fieldcat            = lt_fieldcat
+    EXCEPTIONS
+      inconsistent_interface = 1
+      OTHERS                 = 2.
+
+  IF sy-subrc = 0.
+    CALL FUNCTION 'LVC_TRANSFER_FROM_KKBLO'
+      EXPORTING
+        it_fieldcat_kkblo = lt_fieldcat
+      IMPORTING
+        et_fieldcat_lvc   = gt_field_cat_02.
+
+  ENDIF.
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_display_02</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_display_02 .
+
+  gs_layout_02-grid_title = '항공편별 예약정보'.
+  gs_layout_02-smalltitle = 'X'.
+  gs_layout_02-sel_mode = 'X'.
+  gs_layout_02-ctab_fname = 'CELL_COLOR'.
+  gs_layout_02-info_fname = 'COLOR'.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_handler</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_handler .
+
+  SET HANDLER lcl_event_handler=&gt;handle_double_click FOR go_grid01.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_field_cat_02</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_field_cat_02 .
+
+  LOOP AT gt_field_cat_02 INTO gs_field_cat_02.
+
+    CASE gs_field_cat_02-fieldname.
+      WHEN 'BOOKID'.
+        gs_field_cat_02-coltext = 'Booking Number'.  "필드 이름 설정
+        gs_field_cat_02-lzero = 'X'.
+
+      WHEN 'CUSTOMID'.
+        gs_field_cat_02-coltext = 'Customer Number'.
+        gs_field_cat_02-lzero = 'X'.
+
+      WHEN 'LUGGWEIGHT'.
+        gs_field_cat_02-coltext = 'Weight of Luggage'.
+        gs_field_cat_02-do_sum = 'X'.
+
+      WHEN 'WUNIT'.
+        gs_field_cat_02-coltext = 'Weight Unit'.
+
+      WHEN 'CLASS'.
+        gs_field_cat_02-coltext = 'Flight Class'.
+
+      WHEN 'LOCCURAM'.
+        gs_field_cat_02-coltext = 'Price of booking'.
+
+      WHEN 'LOCCURKEY'.
+        gs_field_cat_02-coltext = 'Local Currency'.
+
+      WHEN 'ORDER_DATE'.
+        gs_field_cat_02-coltext = 'Booking Date'.
+
+      WHEN 'AGENCYNUM'.
+        gs_field_cat_02-coltext = 'Travel Agency Number'.
+
+      WHEN 'PASSNAME'.
+        gs_field_cat_02-coltext = 'Name of the Passenger'.
+
+      WHEN 'SMOKER'.
+        gs_field_cat_02-no_out = 'X'.
+
+      WHEN 'CANCELLED'.
+        gs_field_cat_02-no_out = 'X'.
+
+    ENDCASE.
+
+    MODIFY gt_field_cat_02 FROM gs_field_cat_02.
+
+  ENDLOOP.
+
+
+
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

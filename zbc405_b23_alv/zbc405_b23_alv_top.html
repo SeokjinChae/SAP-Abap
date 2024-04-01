@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZBC405_B23_ALV_TOP</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZBC405_B23_ALV_TOP</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZBC405_B23_ALV_TOP</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include ZBC405_B23_ALV_TOP                       - Report ZBC405_B23_ALV</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zbc405_b00_alv MESSAGE-ID zb23.  "SE91
+
+"______
+" ABAP
+TABLES : sflight.
+<font color ="#0000FF">*DATA : sflight TYPE sflight.</font>
+
+TYPES : BEGIN OF ty_sflight.
+          INCLUDE TYPE sflight.
+TYPES :   light,                             "Exception
+          color(4),                          "row color
+          it_col           TYPE lvc_t_scol,  "cell color
+          changes_possible TYPE icon-id,     "icon
+
+          "버튼
+          display_bookings TYPE c LENGTH 10, "field that can be display as pushbutton
+          it_cell_style    TYPE lvc_t_styl,  "button on grid
+
+<font color ="#0000FF">*          hyper            TYPE int4,</font>
+<font color ="#0000FF">*          url              TYPE lvc_s_hype-href,</font>
+        END OF ty_sflight.
+
+" screen 100 main data
+DATA : gs_sflight TYPE ty_sflight, "sflight,
+       gt_sflight LIKE TABLE OF gs_sflight.
+
+" dialog add info
+DATA: gt_bookings TYPE TABLE OF sbook.
+
+DATA: lv_occupied   TYPE i,
+      lv_capacity   TYPE i,
+      lv_percentage TYPE p LENGTH 8 DECIMALS 1,
+      lv_text       TYPE string. "메세지용
+
+"_______
+" SCREEN
+DATA : ok_code TYPE sy-ucomm.
+
+" main data
+DATA : go_grid TYPE REF TO cl_gui_alv_grid,
+       go_cont TYPE REF TO cl_gui_custom_container.
+
+" dialog data
+DATA: go_dialogbox   TYPE REF TO cl_gui_dialogbox_container,
+      go_alv_booking TYPE REF TO cl_gui_alv_grid.
+
+CLASS : lcl_event_handler DEFINITION DEFERRED.
+DATA : go_handler TYPE REF TO lcl_event_handler.   "local class 참조변수
+
+DATA : gs_variant  TYPE disvariant,   "메소드 전달 매개변수용
+       gs_variant1 TYPE disvariant,  "F4선택용
+       gv_save.
+
+DATA : gs_color TYPE lvc_s_scol.
+<font color ="#0000FF">* = DATA : gs_color TYPE LINE OF lvc_t_scol.</font>
+<font color ="#0000FF">* = DATA : gs_color LIKE LINE OF ty_sflight-it_col.</font>
+
+DATA : gs_cell_style TYPE lvc_s_styl.
+
+DATA : gs_layout TYPE lvc_s_layo.
+
+DATA : gs_print TYPE lvc_s_prnt.
+
+DATA : gt_excluded TYPE ui_functions.   "툴바 제외
+
+DATA : gs_sort TYPE lvc_s_sort,
+       gt_sort TYPE lvc_t_sort.
+
+DATA : gs_filt TYPE lvc_s_filt,
+       gt_filt TYPE lvc_t_filt.
+
+DATA : gs_fcat TYPE lvc_s_fcat,
+       gt_fcat TYPE lvc_t_fcat.
+
+DATA : gs_hyper TYPE lvc_s_hype,
+       gt_hyper TYPE lvc_t_hype.
+
+DATA : gv_hyper TYPE lvc_s_hype-href.
+
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& SELECTION-SCREEN</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE TEXT-t01.
+  SELECT-OPTIONS : so_carr FOR gs_sflight-carrid,
+                   so_conn FOR sflight-connid.
+SELECTION-SCREEN END OF BLOCK b1.
+
+PARAMETERS : pa_var TYPE disvariant-variant.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

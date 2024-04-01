@@ -1,0 +1,49 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZB23_SELECT_MULTI</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZB23_SELECT_MULTI</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Report ZB23_SELECT_MULTI</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZB23_SELECT_MULTI</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT ZB23_SELECT_MULTI.
+
+TYPES ts_SPFLI TYPE bc400_s_connection.
+
+DATA gt_spfli TYPE TABLE OF ts_SPFLI.
+
+DATA gs_spfli TYPE ts_SPFLI.
+
+SELECT *
+         INTO CORRESPONDING FIELDS OF TABLE gt_spfli
+         FROM spfli
+        WHERE carrid = 'LH'.   " &lt;, &gt;, &lt;&gt;, &lt;=, &gt;= ..... "GT, LT, GE, LE, NE ...   "OR AND
+
+SORT gt_spfli BY carrid connid DESCENDING.
+
+LOOP AT gt_spfli INTO gs_spfli.
+  WRITE: / gs_spfli-carrid,
+  gs_spfli-connid,
+  gs_spfli-cityfrom,
+  gs_spfli-airpfrom,
+  gs_spfli-cityto,
+  gs_spfli-airpto,
+  gs_spfli-fltime,
+  gs_spfli-deptime,
+  gs_spfli-arrtime.
+
+ENDLOOP.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

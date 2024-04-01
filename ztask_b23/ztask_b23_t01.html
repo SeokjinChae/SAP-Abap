@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZTASK_B23_T01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZTASK_B23_T01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZTASK_B23_TOP</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZTASK_B23_TOP</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+CLASS: lcl_event_receiver DEFINITION DEFERRED.
+<font color ="#0000FF">** ALV GRID Work Area + Internal Table</font>
+DATA: BEGIN OF gs_flight,
+        carrid     LIKE scarr-carrid,
+        carrname   LIKE scarr-carrname,
+
+        connid     LIKE spfli-connid,
+        countryfr  LIKE spfli-countryfr,
+        countryto  LIKE  spfli-countryto,
+
+        fldate     LIKE sbook-fldate,
+        customid   LIKE sbook-customid,
+        passname   LIKE sbook-passname,
+        bookid     LIKE sbook-bookid,
+        order_date LIKE sbook-order_date,
+        smoker     LIKE sbook-smoker,
+        cancelled  LIKE sbook-cancelled,
+
+        status     LIKE icon-id,
+        light      TYPE c,
+        cell_color TYPE lvc_t_scol,
+        line_color TYPE c LENGTH 4,
+      END OF gs_flight.
+DATA: gt_flight LIKE TABLE OF gs_flight.
+
+<font color ="#0000FF">** Modal Dialog Box Work Area</font>
+DATA: gs_booking TYPE spfli.
+
+<font color ="#0000FF">** Screen</font>
+TABLES:  sscrfields. "Selection Screen Fields
+DATA: gv_switch TYPE n VALUE '0'. "Push button flag
+
+<font color ="#0000FF">** ALV GRID</font>
+DATA: go_cont         TYPE REF TO cl_gui_custom_container,
+      go_grid         TYPE REF TO cl_gui_alv_grid,
+
+      gt_fieldcat     TYPE lvc_t_fcat,
+      gs_fieldcol     LIKE LINE OF gs_flight-cell_color,
+
+      gs_layout       TYPE lvc_s_layo,
+
+      gt_sort         TYPE lvc_t_sort,
+
+      gt_filter       TYPE lvc_t_filt,
+
+      go_handler      TYPE REF TO lcl_event_receiver,
+
+      ok_code         TYPE sy-ucomm.
+
+
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& SELECTION-SCREEN</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME.
+  PARAMETERS: pv_carid LIKE gs_flight-carrid OBLIGATORY DEFAULT 'AA'.
+  SELECT-OPTIONS: so_conid FOR gs_flight-connid NO-EXTENSION,
+                  so_fdate FOR gs_flight-fldate NO-EXTENSION.
+
+  SELECTION-SCREEN SKIP 2.
+  SELECTION-SCREEN PUSHBUTTON 12(30) bt1 USER-COMMAND addinfo.
+  SELECTION-SCREEN SKIP 1.
+
+  " 추가 정보
+  SELECTION-SCREEN BEGIN OF BLOCK b2 WITH FRAME.
+    SELECT-OPTIONS: so_cusid FOR gs_flight-customid MODIF ID add,
+                    so_odate FOR gs_flight-order_date MODIF ID add NO-EXTENSION.
+  SELECTION-SCREEN END OF BLOCK b2.
+SELECTION-SCREEN END OF BLOCK b1.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

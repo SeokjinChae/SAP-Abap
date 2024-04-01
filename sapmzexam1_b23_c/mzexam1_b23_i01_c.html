@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>MZEXAM1_B23_I01_C</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: MZEXAM1_B23_I01_C</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include MZEXAM1_B23_I01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          MZEXAM1_B23_I01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      Module  USER_COMMAND_0100  INPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*       text</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+MODULE user_command_0100 INPUT.
+  CASE ok_code.
+    WHEN 'BACK'.
+      LEAVE TO SCREEN 0.
+    WHEN 'FC1' OR 'FC2'.
+      my_tabstrip-activetab = ok_code.
+  ENDCASE.
+ENDMODULE.
+
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      Module  CHECK_MEMBER  INPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*       text</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+MODULE check_member INPUT.
+  SELECT SINGLE *
+    INTO CORRESPONDING FIELDS OF gs_member
+    FROM ztmember_b23
+    WHERE mb_id = ztmember_b23-mb_id.
+
+  CHECK sy-subrc &lt;&gt; 0.
+  CLEAR gs_member. "WA 초기화
+  MESSAGE e007(bc410).
+ENDMODULE.
+
+MODULE exit INPUT.
+  "cancel - 취소/초기화 exit - 나가기
+  CASE ok_code.
+    WHEN 'CANCEL'.
+<font color ="#0000FF">*      CLEAR: gs_sflight,</font>
+<font color ="#0000FF">*             sdyn_conn,</font>
+<font color ="#0000FF">*             saplane.</font>
+<font color ="#0000FF">*      SET PARAMETER ID:</font>
+<font color ="#0000FF">*        'CAR' FIELD gs_sflight-carrid,</font>
+<font color ="#0000FF">*        'CON' FIELD gs_sflight-connid,</font>
+<font color ="#0000FF">*        'DAY' FIELD gs_sflight-fldate.</font>
+      LEAVE TO SCREEN 100.
+    WHEN 'EXIT'.
+      LEAVE PROGRAM.
+  ENDCASE.
+ENDMODULE.
+
+MODULE check_book INPUT.
+   SELECT SINGLE *
+     INTO CORRESPONDING FIELDS OF gs_book
+     FROM ztbook_b23
+     WHERE book_id = ztbook_b23-book_id.
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      Module  USER_COMMAND_0110  INPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*       text</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+MODULE user_command_0110 INPUT.
+CASE ok_code.
+    WHEN 'FCPUSH'.
+      gs_rent-mb_id = gs_member-mb_id.
+      gs_rent-book_id = gs_book-book_id.
+      gs_rent-rent_dt = sy-datum.
+      gs_rent-rplan_dt = sy-datum + 14.
+      gs_rent-return_st = 'A'.
+      gs_rent-changed_by = sy-uname.
+      gs_rent-changed_on = sy-datum.
+      gs_rent-changed_time = sy-uzeit.
+
+      MODIFY ztrent_b23 FROM gs_rent.
+      IF sy-subrc = 0.
+        MESSAGE '성공적으로 대여 신청되었습니다.' TYPE 'S'.
+      ELSE.
+        MESSAGE '대여신청에 오류가 발생하였습니다.' TYPE 'W'.
+      ENDIF.
+  ENDCASE.
+ENDMODULE.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZB23_ALV_GRID</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZB23_ALV_GRID</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Program ZB23_ALV_GRID</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZB23_ALV_GRID</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+
+include <a href ="zb23_alv_grid_top.html">zb23_alv_grid_top</a>.    " Global Data
+
+include <a href ="zb23_alv_grid_o01.html">zb23_alv_grid_o01</a>.  " PBO-Modules
+include <a href ="zb23_alv_grid_i01.html">zb23_alv_grid_i01</a>.  " PAI-Modules
+include <a href ="zb23_alv_grid_f01.html">zb23_alv_grid_f01</a>.  " FORM-Routines
+
+START-OF-SELECTION.
+
+  SELECT * INTO CORRESPONDING FIELDS OF TABLE gt_sbook
+           FROM sbook
+          WHERE carrid IN so_carr
+            AND connid IN so_conn
+            AND fldate IN so_flda.
+
+  IF gt_sbook IS NOT INITIAL.
+<font color ="#0000FF">*    MESSAGE s002.</font>
+    CALL SCREEN 100.
+  ELSE.
+<font color ="#0000FF">*    MESSAGE s000 WITH TEXT-s01.  "Text symbol과 함께...</font>
+    MESSAGE s001.
+    LEAVE TO LIST-PROCESSING.
+  ENDIF.
+
+<font color ="#0000FF">*GUI Texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* TITLE_0100 --&gt; [B23] ALV 연습과제</font>
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZB00</font>
+<font color ="#0000FF">*001   조건에 만족하는 데이터가 없습니다.</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

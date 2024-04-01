@@ -1,0 +1,55 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZB23_LOCAL_CLASS_C</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZB23_LOCAL_CLASS_C</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZB23_LOCAL_CLASS_C</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZB23_LOCAL_CLASS_C</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+
+CLASS lcl_student DEFINITION.
+
+  PUBLIC SECTION.
+
+    DATA : gs_std TYPE ztstudent_b23.
+
+    METHODS get_data IMPORTING iv_sid TYPE zdsb23_sid. "테이블에서 데이터를 가져오는
+    METHODS display_data.   "set
+
+ENDCLASS.
+
+CLASS lcl_student IMPLEMENTATION.
+
+  METHOD get_data.
+
+    SELECT SINGLE * INTO CORRESPONDING FIELDS OF gs_std
+                    FROM ztstudent_b23
+                   WHERE stu_id = iv_sid.  "매개변수 통해서
+
+  ENDMETHOD.
+
+  METHOD display_data.
+
+    WRITE :/ gs_std-stu_id,
+            gs_std-last_name,
+            gs_std-first_name,
+            gs_std-gender,
+            gs_std-phone,
+            gs_std-email.
+
+
+  ENDMETHOD.
+
+ENDCLASS.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

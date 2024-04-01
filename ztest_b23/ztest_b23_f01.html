@@ -1,0 +1,329 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZTEST_B23_F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZTEST_B23_F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZALVSESSION_B11_F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+<font color ="#0000FF">***INCLUDE ZALVSESSION_B11_F01.</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data.
+
+  IF pa_all = 'X'.
+    SELECT * FROM sflight
+             INTO CORRESPONDING FIELDS OF TABLE gt_flight
+             WHERE carrid IN so_carr AND
+                   connid IN so_conn AND
+                   fldate IN so_fldt.
+
+  ELSEIF pa_usd = 'X'.
+    SELECT * FROM sflight
+           INTO CORRESPONDING FIELDS OF TABLE gt_flight
+           WHERE carrid IN so_carr AND
+                 connid IN so_conn AND
+                 fldate IN so_fldt AND
+                 currency = 'USD'.
+
+  ELSEIF pa_eur = 'X'.
+    SELECT * FROM sflight
+         INTO CORRESPONDING FIELDS OF TABLE gt_flight
+         WHERE carrid IN so_carr AND
+               connid IN so_conn AND
+               fldate IN so_fldt AND
+               currency = 'EUR'.
+
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_data.
+
+  IF gt_flight IS NOT INITIAL.
+    CALL SCREEN 100.
+  ELSE.
+    MESSAGE e001.
+    LEAVE TO LIST-PROCESSING.
+  ENDIF.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form apply_alv_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM apply_alv_data.
+
+  LOOP AT gt_flight INTO gs_flight.
+    "1) 버튼 생성
+    gs_cell_style-fieldname = 'DISPLAY_BOOKINGS'.
+    gs_cell_style-style     = cl_gui_alv_grid=&gt;mc_style_button.
+    APPEND gs_cell_style TO gs_flight-it_cell_style.
+
+    gs_flight-display_bookings = '예약자 확인'.
+
+    "2) 셀 칼라 적용
+    IF gs_flight-fldate(4) = '2023'.
+      gs_field_color-fname = 'FLDATE'.
+      gs_field_color-color-col = col_positive.
+      gs_field_color-color-int = 1.
+      gs_field_color-color-inv = 0.
+
+      APPEND gs_field_color to gs_flight-it_col.
+
+    ENDIF.
+
+    MODIFY gt_flight FROM gs_flight TRANSPORTING display_bookings
+                                                 it_cell_style
+                                                 it_col.
+
+  ENDLOOP.
+
+ENDFORM.
+
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_display</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_display.
+
+  gs_layout-stylefname = 'IT_CELL_STYLE'.
+  gs_layout-ctab_fname = 'IT_COL'.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_field</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_field.
+
+  gs_field_cat-col_pos = 1.
+  gs_field_cat-fieldname = 'CARRID'.
+  gs_field_cat-coltext = 'ID'.
+  APPEND gs_field_cat TO gt_field_cat.
+
+
+  CLEAR gs_field_cat.
+  gs_field_cat-col_pos = 2.
+  gs_field_cat-fieldname = 'CONNID'.
+  gs_field_cat-coltext = 'NO.'.
+  APPEND gs_field_cat TO gt_field_cat.
+
+  CLEAR gs_field_cat.
+  gs_field_cat-col_pos = 3.
+  gs_field_cat-fieldname = 'FLDATE'.
+  gs_field_cat-coltext = 'Date'.
+  APPEND gs_field_cat TO gt_field_cat.
+
+  CLEAR gs_field_cat.
+  gs_field_cat-col_pos = 4.
+  gs_field_cat-fieldname = 'PRICE'.
+  gs_field_cat-coltext = 'Price'.
+  APPEND gs_field_cat TO gt_field_cat.
+
+  CLEAR gs_field_cat.
+  gs_field_cat-col_pos = 5.
+  gs_field_cat-fieldname = 'PLANETYPE'.
+  gs_field_cat-coltext = 'Planetype'.
+  APPEND gs_field_cat TO gt_field_cat.
+
+  CLEAR gs_field_cat.
+  gs_field_cat-col_pos = 6.
+  gs_field_cat-fieldname = 'SEATSMAX'.
+  gs_field_cat-coltext = 'Capacity'.
+  APPEND gs_field_cat TO gt_field_cat.
+
+  CLEAR gs_field_cat.
+  gs_field_cat-col_pos = 7.
+  gs_field_cat-fieldname = 'SEATSOCC'.
+  gs_field_cat-coltext = 'Occupied'.
+  APPEND gs_field_cat TO gt_field_cat.
+
+  CLEAR gs_field_cat.
+  gs_field_cat-col_pos = 8.
+  gs_field_cat-fieldname = 'DISPLAY_BOOKINGS'.
+  gs_field_cat-coltext = 'Booking Info'.
+  APPEND gs_field_cat TO gt_field_cat.
+
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_handler</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_handler.
+
+  SET HANDLER lcl_event_handler=&gt;handle_button_click FOR go_grid.
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form button_click</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; ES_COL_ID</font>
+<font color ="#0000FF">*&      --&gt; ES_ROW_NO</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM button_click  USING    pv_col_id
+                            pv_row_no TYPE lvc_s_roid.
+
+  READ TABLE gt_flight INTO gs_flight INDEX pv_row_no-row_id.
+
+  IF sy-subrc &lt;&gt; 0.
+    MESSAGE i075(bc405_408).
+    EXIT.
+  ENDIF.
+
+  CLEAR gt_bookings.
+
+  SELECT * FROM sbook
+           INTO TABLE gt_bookings
+           WHERE carrid = gs_flight-carrid AND
+                 connid = gs_flight-connid AND
+                 fldate = gs_flight-fldate.
+
+  IF go_dialogbox IS INITIAL.
+
+    PERFORM set_dialog_object.
+    PERFORM display_dialog_grid.
+    PERFORM set_dialog_handler.
+
+  ELSE.
+    PERFORM refresh_alv_grid.
+
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_dialog_object</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_dialog_object.
+
+  CREATE OBJECT go_dialogbox
+    EXPORTING
+      width  = 800
+      height = 200
+      top    = 120
+      left   = 120
+    EXCEPTIONS
+      OTHERS = 0.
+
+  IF sy-subrc &lt;&gt; 0.
+
+  ENDIF.
+
+  CREATE OBJECT go_alv_booking
+    EXPORTING
+      i_parent = go_dialogbox
+    EXCEPTIONS
+      OTHERS   = 0.
+
+  IF sy-subrc &lt;&gt; 0.
+
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_dialog_grid</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_dialog_grid.
+
+  CALL METHOD go_alv_booking-&gt;set_table_for_first_display
+    EXPORTING
+      i_structure_name = 'SBOOK'
+    CHANGING
+      it_outtab        = gt_bookings
+    EXCEPTIONS
+      OTHERS           = 0.
+
+  IF sy-subrc &lt;&gt; 0.
+
+  ENDIF.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_dialog_handler</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_dialog_handler.
+
+  SET HANDLER lcl_event_handler=&gt;handle_close FOR go_dialogbox.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form refresh_alv_grid</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM refresh_alv_grid.
+
+  CALL METHOD go_grid-&gt;refresh_table_display
+<font color ="#0000FF">*    EXPORTING</font>
+<font color ="#0000FF">*      is_stable      =</font>
+<font color ="#0000FF">*      i_soft_refresh =</font>
+<font color ="#0000FF">*    EXCEPTIONS</font>
+<font color ="#0000FF">*      finished       = 1</font>
+<font color ="#0000FF">*      others         = 2</font>
+          .
+  IF sy-subrc &lt;&gt; 0.
+<font color ="#0000FF">*   Implement suitable error handling here</font>
+  ENDIF.
+
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

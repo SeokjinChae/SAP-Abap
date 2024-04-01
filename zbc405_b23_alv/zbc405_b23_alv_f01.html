@@ -1,0 +1,1014 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZBC405_B23_ALV_F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZBC405_B23_ALV_F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZBC405_B23_ALV_F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZBC405_B23_ALV_F01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data .
+
+  SELECT * INTO CORRESPONDING FIELDS OF TABLE gt_sflight
+           FROM sflight
+          WHERE carrid IN so_carr
+            AND connid IN so_conn.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form init_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM init_data .
+
+  so_carr-sign   = 'I'.
+  so_carr-option = 'EQ'.
+  so_carr-low    = 'AA'.
+
+  APPEND so_carr.
+  CLEAR so_carr.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form make_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM make_data .
+
+  LOOP AT gt_sflight INTO gs_sflight.
+
+    " 1) LIGHT 값 적용 ....
+    IF gs_sflight-seatsocc = 0.
+      gs_sflight-light = '1'.
+    ELSEIF gs_sflight-seatsocc &lt; 50.
+      gs_sflight-light = '2'.
+    ELSE.
+      gs_sflight-light = '3'.
+    ENDIF.
+
+
+    " 2) row COLOR 적용
+    IF gs_sflight-fldate(6) = sy-datum(6).
+      gs_sflight-color = 'C' && col_negative && '01'.
+<font color ="#0000FF">*      gs_sflight-color = 'C601'.</font>
+    ENDIF.
+
+    " 3) cell color 적용 (IT_COL)
+<font color ="#0000FF">*   highlight specific aircraft</font>
+    IF gs_sflight-planetype = '747-400'.
+      gs_color-fname     = 'PLANETYPE'.
+      gs_color-color-col = col_positive.
+      gs_color-color-int = 1.
+      gs_color-color-inv = 0.
+      gs_color-nokeycol = 'X'.
+      APPEND gs_color TO gs_sflight-it_col.
+    ENDIF.
+
+    IF gs_sflight-carrid = 'UA'.
+      gs_color-fname     = 'CARRID'.
+      gs_color-color-col = col_negative.
+      gs_color-color-int = 1.
+      gs_color-color-inv = 0.
+      gs_color-nokeycol = 'X'.
+      APPEND gs_color TO gs_sflight-it_col.
+    ENDIF.
+
+    " 4) field catalog
+    IF gs_sflight-fldate &lt; sy-datum.
+      gs_sflight-changes_possible = icon_space.
+    ELSE.
+      gs_sflight-changes_possible = icon_okay.
+    ENDIF.
+
+    " 5) cell button
+    IF gs_sflight-fldate &gt; sy-datum.
+
+      " cell style : 버튼 형태로 그려줌
+      gs_cell_style-fieldname = 'DISPLAY_BOOKINGS'.
+      gs_cell_style-style     = cl_gui_alv_grid=&gt;mc_style_button.  "셀스타일 속성 버튼
+<font color ="#0000FF">*      gs_cell_style-style     = go_grid-&gt;mc_style_button.  "셀스타일 속성</font>
+<font color ="#0000FF">*      gs_cell_style-style     = '20000000'.</font>
+      APPEND gs_cell_style TO gs_sflight-it_cell_style.
+
+      "버튼형태의 셀 값 정의
+      gs_sflight-display_bookings = '예약가능'(t11).
+
+    ENDIF.
+
+    " 6) hyper link
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    IF gs_sflight-carrid = 'AA'.</font>
+<font color ="#0000FF">*      gs_sflight-hyper = '1'.</font>
+<font color ="#0000FF">*    ELSE.</font>
+<font color ="#0000FF">*      gs_sflight-hyper = '2'.</font>
+<font color ="#0000FF">*    ENDIF.</font>
+
+<font color ="#0000FF">*    MODIFY gt_sflight FROM gs_sflight.</font>
+    MODIFY gt_sflight FROM gs_sflight TRANSPORTING light
+                                                   color
+                                                   it_col
+                                                   changes_possible
+                                                   display_bookings
+                                                   it_cell_style.
+    "hyper
+    "url.
+
+  ENDLOOP.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_variant</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_variant.
+
+  gs_variant1-report = sy-cprog.
+
+  CALL FUNCTION 'LVC_VARIANT_SAVE_LOAD'
+    EXPORTING
+      i_save_load = 'F'
+    CHANGING
+      cs_variant  = gs_variant1   "&lt;- 프로그램 이름에 종속된 variant 정보가 환원
+    EXCEPTIONS
+      OTHERS      = 1.
+
+  IF sy-subrc &lt;&gt; 0.
+  ELSE.
+    pa_var = gs_variant1-variant. "화면에 환원
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_data .
+
+  DATA : lv_lin TYPE i.
+
+<font color ="#0000FF">*  DESCRIBE TABLE gt_sflight.    " 건수 (sy-tfill)</font>
+  DESCRIBE TABLE gt_sflight LINES lv_lin.
+
+  IF gt_sflight IS NOT INITIAL.
+    MESSAGE s002 WITH lv_lin."sy-tfill.   "&건의 데이터가 조회되었습니다.
+    CALL SCREEN 100.   " List data = output data 출력 (ALV)
+  ELSE.
+<font color ="#0000FF">*    MESSAGE s000." WITH TEXT-s01 TEXT-s01 'TEST'.  "Text symbol과 함께...</font>
+<font color ="#0000FF">*    MESSAGE e001.  "조건에 만족하는 데이터가 없습니다.</font>
+    MESSAGE s001 DISPLAY LIKE 'E'.  "조건에 만족하는 데이터가 없습니다.
+
+    LEAVE TO LIST-PROCESSING AND RETURN TO SCREEN 0. "초기화면으로 오도록 (에러)
+<font color ="#0000FF">*    LEAVE TO LIST-PROCESSING.</font>
+<font color ="#0000FF">*    LEAVE LIST-PROCESSING.</font>
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_container</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_container .
+
+  " 1) custom control area 에 container 를 link
+  CREATE OBJECT go_cont   "constructor method 가 호출 (IMPORT, EXCEPTIONS)
+    EXPORTING
+      container_name = 'MY_CONTROL'  "100 스크린에 생성한 이름
+    EXCEPTIONS
+      OTHERS         = 1.
+
+  IF sy-subrc &lt;&gt; 0.
+    MESSAGE a000.
+  ENDIF.
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_alv_grid</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_alv_grid .
+
+  " 2) container 에 grid 를 link.
+  CREATE OBJECT go_grid
+    EXPORTING
+      i_parent = go_cont
+    EXCEPTIONS
+      OTHERS   = 1.
+
+  IF sy-subrc &lt;&gt; 0.
+    MESSAGE a000.
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_variant</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& grid 에 적용할 각종 매개변수 셋팅</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_variant .
+
+  "-- layout variant, save mode
+  gs_variant-report  = sy-cprog.
+  gs_variant-variant = pa_var.
+
+  gv_save = 'A'.    "X, U   "저장유형
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_layout</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& layout setting</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_layout .
+
+
+<font color ="#0000FF">*    gs_layout-excp_led   = 'X'.</font>
+  gs_layout-zebra      = 'X'.
+<font color ="#0000FF">*    gs_layout-no_hgridln = 'X'.</font>
+<font color ="#0000FF">*    gs_layout-no_vgridln = 'X'.</font>
+  gs_layout-sel_mode    = 'A'.
+  gs_layout-cwidth_opt  = 'X'.
+<font color ="#0000FF">*    gs_layout-no_rowmark  = 'X'.</font>
+  gs_layout-smalltitle  = 'X'.
+  gs_layout-grid_title  = 'ALV 연습'.
+
+  gs_layout-excp_fname  = 'LIGHT'.
+  gs_layout-info_fname  = 'COLOR'.   "line (=row) color coding 값 전달
+  gs_layout-ctab_fname  = 'IT_COL'.  "cell (=column) color coding 값 전달
+  gs_layout-stylefname  = 'IT_CELL_STYLE'. "cell style
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_sorting</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Sorting setting</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_sorting .
+
+  gs_sort-fieldname = 'FLDATE'.
+  gs_sort-spos      = 1.
+  APPEND gs_sort TO gt_sort.
+
+  gs_sort-fieldname = 'CARRID'.
+  gs_sort-spos      = 2.
+  APPEND gs_sort TO gt_sort.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_filter</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_filter .
+
+  gs_filt-fieldname = 'CARRID'.
+  gs_filt-sign      = 'I'.
+  gs_filt-option    = 'EQ'.
+  gs_filt-low       = 'AA'.
+
+  APPEND gs_filt TO gt_filt.
+  CLEAR gs_filt.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_exclude_toolbar</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_exclude_toolbar .
+
+  "-- Exclude toolbar
+  APPEND '&FIND' TO gt_excluded.
+<font color ="#0000FF">**    APPEND cl_gui_alv_grid=&gt;mc_fc_find TO gt_excluded.</font>
+  APPEND cl_gui_alv_grid=&gt;mc_mb_sum  TO gt_excluded.
+  APPEND cl_gui_alv_grid=&gt;mc_fc_info TO gt_excluded.
+<font color ="#0000FF">*    APPEND cl_gui_alv_grid=&gt;MC_FC_EXCL_ALL TO gt_excluded.</font>
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_field_catalog</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_field_catalog .  "인터널 테이블
+
+  "-- field catalog
+<font color ="#0000FF">*  CLEAR gs_fcat.</font>
+<font color ="#0000FF">*  gs_fcat-fieldname = 'CARRID'.</font>
+<font color ="#0000FF">*  gs_fcat-web_field = 'HYPER'.    " hyper link 정보가 있는 필드 ref.</font>
+<font color ="#0000FF">*  APPEND gs_fcat TO gt_fcat.</font>
+
+  CLEAR gs_fcat.
+  gs_fcat-fieldname = 'FLDATE'.
+  gs_fcat-hotspot   = 'X'.
+  APPEND gs_fcat TO gt_fcat.
+
+  CLEAR gs_fcat.
+  gs_fcat-fieldname = 'SEATSOCC'.
+  gs_fcat-do_sum    = 'X'.
+  APPEND gs_fcat TO gt_fcat.
+
+  CLEAR gs_fcat.
+  gs_fcat-fieldname = 'PAYMENTSUM'.
+  gs_fcat-no_out    = 'X'.
+  APPEND gs_fcat TO gt_fcat.
+
+  CLEAR gs_fcat.
+  gs_fcat-fieldname = 'LIGHT'.
+  gs_fcat-coltext   = 'Utilization'(h02).
+  APPEND gs_fcat TO gt_fcat.
+
+  CLEAR gs_fcat.
+  gs_fcat-fieldname = 'CHANGES_POSSIBLE'.
+  gs_fcat-icon      = 'X'.  " 가운데 정렬 (명시)
+  gs_fcat-col_pos   = 5.
+  gs_fcat-coltext   = 'Changes possible'(h03).
+  gs_fcat-tooltip   = 'Are changes possible?'(t01).
+  APPEND gs_fcat TO gt_fcat.
+
+  CLEAR gs_fcat.
+  gs_fcat-fieldname = 'DISPLAY_BOOKINGS'.   "버튼
+  gs_fcat-coltext   = 'reservation'(h04).
+  APPEND gs_fcat TO gt_fcat.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_alv_grid</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Grid 에 매개변수 적용하여 데이터 출력</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_alv_grid.
+
+  CALL METHOD go_grid-&gt;set_table_for_first_display
+    EXPORTING
+<font color ="#0000FF">*     i_buffer_active      = ''</font>
+<font color ="#0000FF">*     i_bypassing_buffer   = ''</font>
+<font color ="#0000FF">*     i_consistency_check  = ''</font>
+      i_structure_name     = 'SFLIGHT'    "출력 데이터의 구조 (필드 카탈로그 딕셔너리로 정의)
+      is_variant           = gs_variant   "layout variant (없을때와도 비교)
+      i_save               = gv_save      "저장 옵션 : 각 옵션으로도 비교
+      i_default            = 'X'
+      is_layout            = gs_layout    "layout 설정
+      is_print             = gs_print
+<font color ="#0000FF">*     it_special_groups    = ''</font>
+      it_toolbar_excluding = gt_excluded  "툴바 제거
+<font color ="#0000FF">*     it_hyperlink         = gt_hyper</font>
+<font color ="#0000FF">*     it_alv_graphics      = ''</font>
+<font color ="#0000FF">*     it_except_qinfo      = ''</font>
+<font color ="#0000FF">*     ir_salv_adapter      = ''</font>
+    CHANGING
+      it_fieldcatalog      = gt_fcat
+      it_outtab            = gt_sflight   "출력하고자 하는 데이터
+      it_sort              = gt_sort
+      it_filter            = gt_filt.
+<font color ="#0000FF">*    EXCEPTIONS</font>
+<font color ="#0000FF">*      invalid_parameter_combination = 1</font>
+<font color ="#0000FF">*      program_error                 = 2</font>
+<font color ="#0000FF">*      too_many_lines                = 3</font>
+<font color ="#0000FF">*      OTHERS                        = 4.</font>
+
+  IF sy-subrc &lt;&gt; 0.
+<font color ="#0000FF">* Implement suitable error handling here</font>
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form double_click</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_ROW</font>
+<font color ="#0000FF">*&      --&gt; E_COLUMN</font>
+<font color ="#0000FF">*&      --&gt; ES_ROW_NO</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM double_click  USING    pv_row_id." TYPE lvc_s_row.
+<font color ="#0000FF">*                            pv_column</font>
+<font color ="#0000FF">*                            pv_row_no.</font>
+
+  DATA : lv_bookings TYPE sflight-seatsocc.
+  DATA : lv_row_id   TYPE  lvc_s_row.
+
+  lv_row_id = pv_row_id.
+
+  READ TABLE gt_sflight INTO gs_sflight INDEX lv_row_id-index.
+
+  IF sy-subrc = 0.
+
+    lv_bookings = gs_sflight-seatsocc   +
+                  gs_sflight-seatsocc_b +
+                  gs_sflight-seatsocc_f.
+
+    MESSAGE i005 WITH lv_bookings.
+  ELSE.
+    MESSAGE s001 DISPLAY LIKE 'E'.
+  ENDIF.
+
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_handler</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_handler .
+
+  " Static [CLASS]
+  SET HANDLER: lcl_event_handler=&gt;handle_button_click FOR go_grid.
+
+  " Instance
+  CREATE OBJECT go_handler. "객체선언
+  SET HANDLER: go_handler-&gt;handle_double_click  FOR go_grid,
+               go_handler-&gt;handle_hotspot_click FOR go_grid,
+               go_handler-&gt;handle_print_top     FOR go_grid,
+               go_handler-&gt;handle_print_list    FOR go_grid,
+               go_handler-&gt;handle_on_toolbar    FOR go_grid,
+               go_handler-&gt;handle_user_command  FOR go_grid,
+               go_handler-&gt;handle_context_menu  FOR go_grid.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form hotspot_click</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_ROW_ID</font>
+<font color ="#0000FF">*&      --&gt; E_COLUMN_ID</font>
+<font color ="#0000FF">*&      --&gt; ES_ROW_NO</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM hotspot_click  USING    pv_row_id
+                             pv_col_id
+                             pv_row_no.
+
+  DATA : lv_bookings TYPE sflight-seatsocc.
+  DATA : lv_row_id TYPE  lvc_s_row.
+
+  lv_row_id = pv_row_id.
+
+  READ TABLE gt_sflight INTO gs_sflight INDEX lv_row_id-index.
+
+  IF sy-subrc = 0.
+    MESSAGE i006 WITH gs_sflight-planetype.
+  ELSE.
+    MESSAGE s001 DISPLAY LIKE 'E'.
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_hyperlink_table</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_hyperlink_table .
+
+  CLEAR gs_hyper.
+  gs_hyper-handle = '1'.
+  gs_hyper-href   = 'www.naver.com'.
+  APPEND gs_hyper TO gt_hyper.
+
+  CLEAR gs_hyper.
+  gs_hyper-handle = '2'.
+  gs_hyper-href   = 'www.google.com'.
+  APPEND gs_hyper TO gt_hyper.
+
+  CLEAR gs_hyper.
+  gs_hyper-handle = '3'.
+  gs_hyper-href   = 'www.sap.com'.
+  APPEND gs_hyper TO gt_hyper.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form print_top</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM print_top .
+
+  DATA : lv_pos TYPE i.
+
+  FORMAT COLOR COL_HEADING.
+  WRITE: / sy-datum.
+
+  lv_pos = sy-linsz / 2 - 3. " length of pagno: 6 chars
+  WRITE AT lv_pos sy-pagno.
+
+  lv_pos = sy-linsz - 11. " length of username: 12 chars
+  WRITE: AT lv_pos sy-uname.
+
+  ULINE.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form print_list</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM print_list .
+
+  DATA : ls_so_car LIKE LINE OF so_carr,
+         ls_so_con LIKE LINE OF so_conn.
+
+  DATA : lv_name TYPE scarr-carrname.
+
+  CONSTANTS : lc_end TYPE i VALUE 20.
+
+  FORMAT COLOR COL_HEADING.
+  WRITE: / 'Select options'(000), AT lc_end space.
+  SKIP.
+  WRITE: / 'Airlines'(001), AT lc_end space.
+  ULINE AT /(lc_end).
+  FORMAT COLOR COL_NORMAL.
+
+  LOOP AT so_carr INTO ls_so_car.
+
+    SELECT SINGLE carrname INTO lv_name
+             FROM scarr
+            WHERE carrid = ls_so_car-low.
+
+    WRITE: / "ls_so_car-sign,
+             "ls_so_car-option,
+             ls_so_car-low,
+             "ls_so_car-high,
+             lv_name.
+  ENDLOOP.
+
+  SKIP.
+
+  FORMAT COLOR COL_HEADING.
+  WRITE: / 'Connections'(002), AT lc_end space .
+  ULINE AT /(lc_end).
+  FORMAT COLOR COL_NORMAL.
+  LOOP AT so_conn INTO ls_so_con.
+    WRITE: / ls_so_con-sign,
+             ls_so_con-option,
+             ls_so_con-low NO-ZERO,
+             ls_so_con-high NO-ZERO.
+  ENDLOOP.
+
+  SKIP.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form on_toolbar</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM on_toolbar USING pe_object TYPE REF TO cl_alv_event_toolbar_set.
+
+  DATA : ls_button TYPE stb_button.
+
+<font color ="#0000FF">*-   Separator</font>
+  ls_button-butn_type = 3.
+  INSERT ls_button INTO TABLE pe_object-&gt;mt_toolbar. "(table type:TTB_BUTTON)
+
+<font color ="#0000FF">*-   Create button "total percentage of occupied seats"</font>
+  CLEAR ls_button.
+  ls_button-function  = 'PERCENTAGE'.     "fcode (sy-ucomm)
+  ls_button-icon      = icon_graphics.    "icon
+  ls_button-quickinfo = TEXT-z01.         "요약정보텍스트
+  ls_button-butn_type = 0.                "버튼타입 (TB_BTYPE - fixed value)
+  ls_button-disabled  = ''.               "비활성여부 ('','X')
+  ls_button-text      = '% (total)'(tot). "버튼텍스트
+  ls_button-checked   = ''.               "누름('','X')
+  INSERT ls_button INTO TABLE pe_object-&gt;mt_toolbar.
+
+<font color ="#0000FF">*-   Create button "percentage of occupied seats for marked flights"</font>
+  CLEAR ls_button.
+  ls_button-function  = 'PERCENTAGE_MARKED'.
+  ls_button-text      = '% (marked)'(mar).
+  ls_button-quickinfo = TEXT-z02.
+  ls_button-butn_type = 0.
+  INSERT ls_button INTO TABLE pe_object-&gt;mt_toolbar.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form user_command</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM user_command USING pv_ucomm TYPE sy-ucomm
+                        pv_rowid TYPE i.
+
+  DATA : lv_idx TYPE i.
+
+  CASE pv_ucomm.
+
+    WHEN 'PERCENTAGE'.  "total percentage of occupied seats
+      PERFORM total_percentage.
+
+    WHEN 'PERCENTAGE_MARKED'. "percentage of occupied seats for marked flights
+      PERFORM marked_percentage.
+
+    WHEN 'DISP_CARR'.
+      lv_idx = pv_rowid.
+      PERFORM display_carr_info USING lv_idx.
+
+  ENDCASE.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form button_click</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& 요구사항 : 버튼을 클릭하면 해당하는 운항일정에 예약된 정보를 조회한다. (다이얼로그박스 활용)</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; ES_COL_ID</font>
+<font color ="#0000FF">*&      --&gt; ES_ROW_NO</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM button_click  USING    ps_col_id
+                            ps_row_no TYPE lvc_s_roid.
+
+<font color ="#0000FF">*- 1) 버튼을 누른 행의 정보를 읽어온다. (선택된 행의 인덱스 정보를 통해)</font>
+  READ TABLE gt_sflight INTO gs_sflight INDEX ps_row_no-row_id.
+
+  IF sy-subrc NE 0.
+    MESSAGE i075(bc405_408).
+    EXIT.
+  ENDIF.
+
+<font color ="#0000FF">*- 2) 선택된 운항 정보를 통해 예약된 정보 읽어온다. (SBOOK)</font>
+  CLEAR gt_bookings.
+
+  SELECT * FROM sbook INTO TABLE gt_bookings
+    WHERE carrid = gs_sflight-carrid
+      AND connid = gs_sflight-connid
+      AND fldate = gs_sflight-fldate.
+
+
+<font color ="#0000FF">*- 3) 예약 정보 데이터를 다이얼로그박스 형태로 출력한다.</font>
+  " (다이얼로그 컨테이너 + alv 그리드 선언)
+  IF go_dialogbox IS INITIAL.
+
+    PERFORM set_dialog_object.
+    PERFORM set_dialog_handler.
+    PERFORM display_dialog_grid.
+
+  ELSE.
+
+    PERFORM refresh_alv_grid.   "메인 출력 화면 갱신
+
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form total_percentage</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM total_percentage .
+
+  DATA: lv_occupied   TYPE i,
+        lv_capacity   TYPE i,
+        lv_percentage TYPE p LENGTH 8 DECIMALS 1,
+        lv_text       TYPE string. "메세지용
+
+  " debugger checking
+  LOOP AT gt_sflight INTO gs_sflight." where smoker ='X'.
+    lv_occupied = lv_occupied + gs_sflight-seatsocc.
+    lv_capacity = lv_capacity + gs_sflight-seatsmax.
+  ENDLOOP.
+
+  lv_percentage = lv_occupied / lv_capacity * 100.
+  MOVE lv_percentage TO lv_text.  "자동형변환
+<font color ="#0000FF">*  lv_text =  lv_percentage.</font>
+
+  " 메세지로 보여지도록
+<font color ="#0000FF">*  lv_text = '예약좌석률 :'(occ) && ` ` && lv_text.</font>
+  CONCATENATE TEXT-occ ` ` lv_text INTO lv_text.
+
+<font color ="#0000FF">*  MESSAGE lv_text TYPE 'I'.</font>
+  MESSAGE i000 WITH lv_text.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form marked_percentage</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM marked_percentage .
+
+  DATA : lt_row_no TYPE lvc_t_roid,  "get_selected_rows
+         ls_row_no TYPE lvc_s_roid.
+
+  DATA : lt_row_id TYPE lvc_t_row,
+         ls_row_id TYPE lvc_s_row.
+
+  DATA : lv_occupied   TYPE i,
+         lv_capacity   TYPE i,
+         lv_percentage TYPE p LENGTH 8 DECIMALS 1,
+         lv_text       TYPE string.
+
+  CALL METHOD go_grid-&gt;get_selected_rows    "&lt;-- 그리드상에 행 선택 정보를 가져온다.
+    IMPORTING
+      et_index_rows = lt_row_id
+      et_row_no     = lt_row_no.
+
+  " short form
+<font color ="#0000FF">*  go_grid-&gt;get_selected_rows(</font>
+<font color ="#0000FF">*          IMPORTING</font>
+<font color ="#0000FF">*            et_row_no = lt_row_no ).</font>
+
+<font color ="#0000FF">*  DESCRIBE TABLE lt_row_no LINES sy-tfill.</font>
+<font color ="#0000FF">*  IF sy-tfill &gt; 0.</font>
+
+  IF lines( lt_row_no ) &gt; 0.   "인터널 테이블의 라인수를 반환해주는 내장 함수
+
+    LOOP AT lt_row_no INTO ls_row_no.
+<font color ="#0000FF">*      CLEAR gs_sflight.</font>
+      READ TABLE gt_sflight INTO gs_sflight INDEX ls_row_no-row_id.   " &lt;--
+
+      IF sy-subrc = 0.
+        lv_occupied = lv_occupied + gs_sflight-seatsocc.
+        lv_capacity = lv_capacity + gs_sflight-seatsmax.
+      ENDIF.
+
+      CLEAR gs_sflight.
+
+    ENDLOOP.
+
+    lv_percentage = lv_occupied / lv_capacity * 100.
+    MOVE lv_percentage TO lv_text.   "자동 형변환
+
+    CONCATENATE TEXT-occ ` ` lv_text INTO lv_text.
+    MESSAGE i000 WITH lv_text.
+
+  ELSE.
+
+    MESSAGE i000 WITH TEXT-one.
+
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_print</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_print .
+
+  gs_print-prntlstinf  = 'X'.
+  gs_print-grpchgedit  = 'X'.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form context_menu</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_OBJECT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM context_menu  USING  pe_object TYPE REF TO cl_ctmenu
+                CHANGING  cv_rowid TYPE i.  " 로컬 클래스 내부의 속성에 전달
+
+  DATA : ls_col_id TYPE lvc_s_col.   "FIELDNAME 정보
+
+  " 현재 선택한 컬럼 정보
+  CALL METHOD go_grid-&gt;get_current_cell
+    IMPORTING
+      e_row     = cv_rowid            "선택한 행의 인덱스 값 =&gt; 클래스 내부로 전달되어야 함
+      es_col_id = ls_col_id.          "FIELDNAME 정보
+
+  IF ls_col_id-fieldname = 'CARRID'.
+
+    "구분선 추가
+    CALL METHOD pe_object-&gt;add_separator.
+<font color ="#0000FF">*    pe_object-&gt;add_separator( ).   "short form</font>
+
+    " 툴바 속성에 기능추가 (fcode 반드시.. 클래스 타입 속성에 입력)
+    CALL METHOD pe_object-&gt;add_function
+      EXPORTING
+        fcode = 'DISP_CARR'    "&lt;- e_ucomm (sy-ucomm)  : user command 에서 활용되어야 한다.
+        text  = TEXT-z03.  "display airline
+<font color ="#0000FF">*       icon  =</font>
+<font color ="#0000FF">*       ftype =</font>
+<font color ="#0000FF">*       disabled          =</font>
+<font color ="#0000FF">*       hidden            =</font>
+<font color ="#0000FF">*       checked           =</font>
+<font color ="#0000FF">*       accelerator       =</font>
+<font color ="#0000FF">*       insert_at_the_top = SPACE</font>
+
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_carr_info</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_carr_info USING pv_idx.    " 선택한 행의 인덱스 정보 (컨텍스트 메뉴에서 발생한)
+
+<font color ="#0000FF">*- 요구사항 : 해당 라인의 항공사ID 정보를 찾아 항공사 이름을 반환한다.</font>
+
+  DATA : lv_carrname TYPE scarr-carrname.
+  DATA : lv_idx TYPE i.
+
+  CALL METHOD go_grid-&gt;get_current_cell
+    IMPORTING
+      e_row = lv_idx. "cv_rowid  .
+
+  READ TABLE gt_sflight INTO gs_sflight INDEX lv_idx. "pv_idx.
+
+  IF sy-subrc = 0.
+    SELECT SINGLE carrname INTO lv_carrname
+             FROM scarr
+             WHERE carrid = gs_sflight-carrid.
+
+    MESSAGE lv_carrname TYPE 'I'.
+
+  ELSE.
+    MESSAGE i001. "조건에 만족하는 데이터가 없습니다.
+<font color ="#0000FF">*    MESSAGE 타입1+메세지ID3(메세지클래스).</font>
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_dialog_object</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_dialog_object .
+
+<font color ="#0000FF">*- dialogbox container object 생성</font>
+
+  CREATE OBJECT go_dialogbox
+    EXPORTING
+      width   = 800
+      height  = 200
+      top     = 120
+      left    = 120
+      caption = 'Bookings'(boo)
+    EXCEPTIONS
+      OTHERS  = 0.
+
+  IF sy-subrc &lt;&gt; 0.
+    MESSAGE a010(bc405_408).
+  ENDIF.
+
+<font color ="#0000FF">*- grid object 생성</font>
+
+  CREATE OBJECT go_alv_booking
+    EXPORTING
+      i_parent = go_dialogbox
+    EXCEPTIONS
+      OTHERS   = 1.
+
+  IF sy-subrc &lt;&gt; 0.
+    MESSAGE a010(bc405_408).
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_dialog_grid</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_dialog_grid .
+
+  CALL METHOD go_alv_booking-&gt;set_table_for_first_display
+    EXPORTING
+      i_structure_name = 'SBOOK'
+    CHANGING
+      it_outtab        = gt_bookings
+    EXCEPTIONS
+      OTHERS           = 1.
+
+  IF sy-subrc &lt;&gt; 0.
+    MESSAGE a012(bc405_408).
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_dialog_handler</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_dialog_handler .
+
+  SET HANDLER lcl_event_handler=&gt;handle_close FOR go_dialogbox.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form refresh_alv_grid</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM refresh_alv_grid .
+
+  CALL METHOD go_grid-&gt;refresh_table_display.
+<font color ="#0000FF">*   EXPORTING</font>
+<font color ="#0000FF">*     is_stable      =</font>
+<font color ="#0000FF">*     i_soft_refresh =</font>
+<font color ="#0000FF">*   EXCEPTIONS</font>
+<font color ="#0000FF">*     finished       = 1</font>
+<font color ="#0000FF">*     others         = 2</font>
+<font color ="#0000FF">*    .</font>
+<font color ="#0000FF">*  IF sy-subrc &lt;&gt; 0.</font>
+<font color ="#0000FF">**  Implement suitable error handling here</font>
+<font color ="#0000FF">*  ENDIF.</font>
+
+
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

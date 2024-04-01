@@ -1,0 +1,119 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZB23_ALV_CONTAINER</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZB23_ALV_CONTAINER</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  alv container</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZB00_ALV_CONTAINER</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& To be done:</font>
+<font color ="#0000FF">*& - delete control area in screen 100.</font>
+<font color ="#0000FF">*& - define go_container as a docking container (cl_gui_docking_container)</font>
+<font color ="#0000FF">*&   (instead of a custom control container)</font>
+<font color ="#0000FF">*& - adapt CREATE OBJECT for go_container</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">**** SAP Control 종류 : Tree, Picture, Textedit, Splitter</font>
+<font color ="#0000FF">**** SAP Container 종류</font>
+<font color ="#0000FF">* Custom Container : 스크린 페인터를 사용하는 일반적인 화면에서 영역을 정의</font>
+<font color ="#0000FF">* Docking Container : 스크린 영역의 각 모서리에 붙어서 크기를 조절할 수 있게 한다.</font>
+<font color ="#0000FF">*                     ALV 프로그램에서 Custom Container와 함께 자주 사용된다.</font>
+<font color ="#0000FF">* Splitter Container : 여러 영역으로 컨테이너를 분리할 때 사용된다.</font>
+<font color ="#0000FF">* Easy Splitter Container : Splitter 컨테이너와 비슷한 기능을 하며 분리된 영역을</font>
+<font color ="#0000FF">*                          상하 좌우로 한 번 더 분리할 수 있다.</font>
+<font color ="#0000FF">* Dialog Box Container : Dialog Box 또는 Full screen에서 Dialog Box형태로</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zb23_alv_container MESSAGE-ID zb00.  "SE91 : message class
+
+include <a href ="zb23_alv_cont_top.html">ZB23_ALV_CONT_TOP</a>.
+<font color ="#0000FF">*INCLUDE zb00_alv_cont_top.                           " Global Data</font>
+include <a href ="zb23_alv_cont_c01.html">ZB23_ALV_CONT_C01</a>.
+<font color ="#0000FF">*INCLUDE zb00_alv_cont_c01.                           " Local class</font>
+include <a href ="zb23_alv_cont_o01.html">ZB23_ALV_CONT_O01</a>.
+<font color ="#0000FF">*INCLUDE zb00_alv_cont_o01.                           " PBO-Modules</font>
+include <a href ="zb23_alv_cont_i01.html">ZB23_ALV_CONT_I01</a>.
+<font color ="#0000FF">*INCLUDE zb00_alv_cont_i01.                           " PAI-Modules</font>
+include <a href ="zb23_alv_cont_f01.html">ZB23_ALV_CONT_F01</a>.
+<font color ="#0000FF">*INCLUDE zb00_alv_cont_f01.                           " FORM-Routines</font>
+
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& INITIALIZATION</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*INITIALIZATION.</font>
+<font color ="#0000FF">*  PERFORM check_auth.  "권한체크</font>
+<font color ="#0000FF">*  PERFORM init_data.   "초기값설정</font>
+
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& AT SELECTION-SCREEN</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+AT SELECTION-SCREEN OUTPUT.   "PBO
+  PERFORM modify_screen.
+
+<font color ="#0000FF">*AT SELECTION-SCREEN.          "PAI</font>
+
+<font color ="#0000FF">*AT SELECTION-SCREEN ON BLOCK.  "block 별 pai 처리</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*AT SELECTION-SCREEN ON so_carr. "필드 체크 등</font>
+<font color ="#0000FF">*  PERFORM check_carrid USING so_carr-low.</font>
+<font color ="#0000FF">*  PERFORM check_carrid USING so_carr-high.</font>
+
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR pa_var. " F4
+  PERFORM get_layout_variant.
+
+<font color ="#0000FF">*AT SELECTION-SCREEN ON HELP-REQUEST FOR pa_var. " F1</font>
+
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& START-OF-SELECTION</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+START-OF-SELECTION.
+
+  PERFORM get_data.  "데이터베이스에서 조회조건을 기준으로 데이터를 가져온다.
+  PERFORM make_data. "가져온 데이터들을 가공 및 처리
+
+<font color ="#0000FF">*-- 출력부</font>
+<font color ="#0000FF">*END-OF-SELECTION.  (생략 가능)</font>
+  PERFORM display_data.
+
+<font color ="#0000FF">*GUI Texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* TITLE_0100 --&gt; [CL2-B00] ALV 만들기 연습</font>
+
+<font color ="#0000FF">*Text elements</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* S01 조건을 만족하는 데이터가 없습니다.</font>
+<font color ="#0000FF">* T01 조회조건</font>
+<font color ="#0000FF">* T02 선택조건</font>
+
+
+<font color ="#0000FF">*Selection texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* PA_R1         custom container</font>
+<font color ="#0000FF">* PA_R2         docking container</font>
+<font color ="#0000FF">* PA_R3         split container</font>
+<font color ="#0000FF">* PA_R4         easy split container</font>
+<font color ="#0000FF">* PA_R5         dialog box container</font>
+<font color ="#0000FF">* PA_S1         by custom container</font>
+<font color ="#0000FF">* PA_S2         by docking container</font>
+<font color ="#0000FF">* PA_VAR         Layout variant</font>
+<font color ="#0000FF">* SO_CARR         항공사코드</font>
+<font color ="#0000FF">* SO_CONN         항공편</font>
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZB00</font>
+<font color ="#0000FF">*000   & & &</font>
+<font color ="#0000FF">*001   조건에 만족하는 데이터가 없습니다.</font>
+<font color ="#0000FF">*002   &건의 데이터가 조회되었습니다.</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

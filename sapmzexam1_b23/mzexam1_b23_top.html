@@ -1,0 +1,38 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>MZEXAM1_B23_TOP</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: MZEXAM1_B23_TOP</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include MZEXAM1_B23_TOP</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include MZEXAM1_B23_TOP                          - Module Pool      SAPMZEXAM1_B23</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+PROGRAM sapmzexam1_b23.
+
+TABLES : ztmember_b23,
+         ztbook_b23,
+         ztrent_b23.
+
+DATA : gs_member TYPE ztmember_b23,
+       gs_book   TYPE ztbook_b23,
+       gs_rent   TYPE ztrent_b23.
+
+DATA: ok_code    LIKE sy-ucomm.
+
+DATA : dynnr TYPE sy-dynnr.   "화면 지정을 위한 화면 번호
+
+CONTROLS MY_TABSTRIP TYPE TABSTRIP.
+
+DATA: icon      TYPE icons-text,
+      icon_name TYPE string.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

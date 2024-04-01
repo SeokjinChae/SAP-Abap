@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZBC405_B23_SCREEN_E01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZBC405_B23_SCREEN_E01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZBC405_B23_SCREEN_E01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZBC405_B23_SCREEN_E01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+INITIALIZATION.
+<font color ="#0000FF">* Initialize select-options for CARRID" OPTIONAL</font>
+  MOVE: 'AA' TO so_car-low,
+        'QF' TO so_car-high,
+        'BT' TO so_car-option,
+        'I'  TO so_car-sign.
+  APPEND so_car.
+
+  CLEAR so_car.
+  MOVE: 'AZ' TO so_car-low,
+        'EQ' TO so_car-option,
+        'E'  TO so_car-sign.
+  APPEND so_car.
+
+  tab1 = 'Connections'(t11).
+  tab2 = 'Date'(t12).
+  tab3 = 'Type of Flights'(t13).
+
+
+  airlines-activetab = 'DATE'.
+  airlines-dynnr = '1200'.
+
+  AT SELECTION-SCREEN ON BLOCK param.
+<font color ="#0000FF">* check country for national flights is not empty</font>
+  CHECK pa_nat = 'X' AND pa_ctry = space.
+  MESSAGE e003(bc405).
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+AT SELECTION-SCREEN OUTPUT.
+  CASE sy-dynnr.
+    WHEN 1100.
+      LOOP AT SCREEN.
+        IF screen-group1 = 'DET'.
+          screen-active = gv_switch.
+          MODIFY SCREEN.
+        ENDIF.
+      ENDLOOP.
+
+      IF gv_switch = '1'.
+        gv_txt = text-p02.
+      ELSE.
+        gv_txt = text-p01.
+<font color ="#0000FF">*       clear additional select-options to avoid unwanted</font>
+<font color ="#0000FF">*       influence at selection from database</font>
+        REFRESH: so_start,
+                 so_dest.
+      ENDIF.
+  ENDCASE.
+
+
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+AT SELECTION-SCREEN.
+<font color ="#0000FF">* Evaluate pushbutton command</font>
+  CASE sscrfields-ucomm.
+    WHEN 'DETAILS'.
+      CHECK sy-dynnr = 1100.
+      IF gv_switch = '1'.
+        gv_switch = '0'.
+      ELSE.
+        gv_switch = '1'.
+      ENDIF.
+  ENDCASE.
+
+
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&   Event START-OF-SELECTION</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+START-OF-SELECTION.
+<font color ="#0000FF">* Checking the output parameters</font>
+  CASE gc_mark.
+    WHEN pa_all.
+<font color ="#0000FF">*     Radiobutton ALL is marked</font>
+      SELECT * FROM dv_flights INTO gs_flight
+        WHERE carrid IN so_car
+          AND connid IN so_con
+          AND fldate IN so_fdt.
+
+        WRITE: / gs_flight-carrid,
+                 gs_flight-connid,
+                 gs_flight-fldate,
+                 gs_flight-countryfr,
+                 gs_flight-cityfrom,
+                 gs_flight-airpfrom,
+                 gs_flight-countryto,
+                 gs_flight-cityto,
+                 gs_flight-airpto,
+                 gs_flight-seatsmax,
+                 gs_flight-seatsocc.
+      ENDSELECT.
+    WHEN pa_nat.
+<font color ="#0000FF">*     Radiobutton NATIONAL is marked</font>
+      SELECT * FROM dv_flights INTO gs_flight
+        WHERE carrid IN so_car
+          AND connid IN so_con
+          AND fldate IN so_fdt
+          AND countryto = dv_flights~countryfr
+          AND countryto = pa_ctry.
+
+        WRITE: / gs_flight-carrid,
+                 gs_flight-connid,
+                 gs_flight-fldate,
+                 gs_flight-countryfr,
+                 gs_flight-cityfrom,
+                 gs_flight-airpfrom,
+                 gs_flight-countryto,
+                 gs_flight-cityto,
+                 gs_flight-airpto,
+                 gs_flight-seatsmax,
+                 gs_flight-seatsocc.
+      ENDSELECT.
+    WHEN pa_int.
+<font color ="#0000FF">*     Radiobutton INTERNATIONAL is marked</font>
+      SELECT * FROM dv_flights INTO gs_flight
+        WHERE carrid IN so_car
+          AND connid IN so_con
+          AND fldate IN so_fdt
+          AND countryto &lt;&gt; dv_flights~countryfr.
+
+        WRITE: / gs_flight-carrid,
+                 gs_flight-connid,
+                 gs_flight-fldate,
+                 gs_flight-countryfr,
+                 gs_flight-cityfrom,
+                 gs_flight-airpfrom,
+                 gs_flight-countryto,
+                 gs_flight-cityto,
+                 gs_flight-airpto,
+                 gs_flight-seatsmax,
+                 gs_flight-seatsocc.
+      ENDSELECT.
+  ENDCASE.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

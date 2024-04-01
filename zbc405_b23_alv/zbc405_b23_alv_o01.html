@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZBC405_B23_ALV_O01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZBC405_B23_ALV_O01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZBC405_B23_ALV_O01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZBC405_B23_ALV_O01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module CLEAR_OK_CODE OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE clear_ok_code OUTPUT.
+  CLEAR ok_code.
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module STATUS_0100 OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE status_0100 OUTPUT.
+  SET PF-STATUS 'STATUS_0100'.
+  SET TITLEBAR 'TITLE_0100'.
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module INIT_CONTROL OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE init_control OUTPUT.
+
+  IF go_cont IS INITIAL.   " 프로그램 실행 최초에만 생성되도록 한다.
+<font color ="#0000FF">* = IF go_cont IS NOT BOUND.</font>
+
+    PERFORM set_container.
+    PERFORM set_alv_grid.
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+    PERFORM set_handler.   "정의된 로컬이벤트 사용 등록해야만 GRID에서 활용가능하다.
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+    PERFORM set_variant.
+    PERFORM set_layout.
+<font color ="#0000FF">*    PERFORM set_print.</font>
+<font color ="#0000FF">*    PERFORM set_sorting.</font>
+<font color ="#0000FF">*    PERFORM set_filter.</font>
+    PERFORM set_exclude_toolbar.
+<font color ="#0000FF">*    PERFORM set_hyperlink_table.</font>
+    PERFORM set_field_catalog.
+    PERFORM display_alv_grid.
+
+  ELSE.
+<font color ="#0000FF">*    PERFORM refresh_alv_grid.</font>
+  ENDIF.
+
+ENDMODULE.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

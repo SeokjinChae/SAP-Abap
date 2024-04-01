@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZTEST_B23_C</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZTEST_B23_C</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  왕초보 ALV 과제</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZALVSESSION_B23</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT ztest_b23_c MESSAGE-ID zb23.
+
+include <a href ="ztest_b23_t01_c.html">ZTEST_B23_T01_C</a>.
+<font color ="#0000FF">*INCLUDE ZTEST_B23_T01.</font>
+
+include <a href ="ztest_b23_c01_c.html">ZTEST_B23_C01_C</a>.
+<font color ="#0000FF">*INCLUDE ZTEST_B23_C01.</font>
+
+
+include <a href ="ztest_b23_o01_c.html">ZTEST_B23_O01_C</a>.
+<font color ="#0000FF">*INCLUDE ZTEST_B23_O01.</font>
+
+include <a href ="ztest_b23_i01_c.html">ZTEST_B23_I01_C</a>.
+<font color ="#0000FF">*INCLUDE ZTEST_B23_I01.</font>
+
+include <a href ="ztest_b23_e01_c.html">ZTEST_B23_E01_C</a>.
+<font color ="#0000FF">*INCLUDE ZTEST_B23_E01.</font>
+
+
+include <a href ="ztest_b23_f01_c.html">ZTEST_B23_F01_C</a>.
+<font color ="#0000FF">*INCLUDE ZTEST_B23_F01.</font>
+
+<font color ="#0000FF">*GUI Texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* TITLE_0100 --&gt; 왕초보세션 ALV 예제</font>
+
+<font color ="#0000FF">*Text elements</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* 001 Search Conditions</font>
+
+
+<font color ="#0000FF">*Selection texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* PA_ALL         All Currency</font>
+<font color ="#0000FF">* PA_EUR         EUR</font>
+<font color ="#0000FF">* PA_USD         USD</font>
+<font color ="#0000FF">* SO_CARR         Airline</font>
+<font color ="#0000FF">* SO_CONN         Connection Number</font>
+<font color ="#0000FF">* SO_FLDT         Flight date</font>
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: BC405_408</font>
+<font color ="#0000FF">*075   Internal Error</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZB23</font>
+<font color ="#0000FF">*001   조건에 만족하는 데이터가 없습니다.</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

@@ -1,0 +1,787 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZREXAM3_B23_F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZREXAM3_B23_F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZREXAM3_B23_F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZREXAM3_B23_F01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data .
+
+  IF p1 = 'X'.
+
+    SELECT
+      a~mb_id
+      a~mb_nm
+      a~mb_st
+      b~book_id
+      b~book_nm
+      c~rent_dt
+      c~rplan_dt
+      c~return_st
+      c~return_dt
+
+
+      INTO CORRESPONDING FIELDS OF TABLE gt_rent
+      FROM ztrent_b23 AS c INNER JOIN ztmember_b23 AS a
+
+      ON c~mb_id = a~mb_id
+
+      INNER JOIN ztbook_b23 AS b
+      ON c~book_id = b~book_id
+
+      WHERE a~mb_id IN so_mid
+        AND a~mb_st EQ so_mst
+        AND c~rplan_dt IN so_rplan.
+
+  ENDIF.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data2</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data2 .
+
+  IF p2 = 'X'.
+
+    SELECT
+      mb_id
+      mb_nm
+      telno
+      email
+
+      INTO CORRESPONDING FIELDS OF TABLE gt_member
+      FROM ztmember_b23
+      WHERE mb_id IN so_mid2
+      AND mb_st = 'A'.
+
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module INIT_CONTROL2 OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form call_alv_grid</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM call_alv_grid .
+  CALL METHOD go_grid-&gt;set_table_for_first_display
+    EXPORTING
+      is_variant      = gs_variant
+      i_save          = gs_save
+      is_layout       = gs_layout
+    CHANGING
+      it_outtab       = gt_rent
+      it_fieldcatalog = gt_field_cat
+<font color ="#0000FF">*     it_sort         = gt_sorting_criteria</font>
+<font color ="#0000FF">*     it_filter       = gt_filter</font>
+    EXCEPTIONS
+<font color ="#0000FF">*     invalid_parameter_combination = 1</font>
+<font color ="#0000FF">*     program_error   = 2</font>
+<font color ="#0000FF">*     too_many_lines  = 3</font>
+      OTHERS          = 1.
+  IF sy-subrc &lt;&gt; 0.
+  ENDIF.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_field</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_field .
+  DATA : lt_fieldcat TYPE kkblo_t_fieldcat.
+
+  CALL FUNCTION 'K_KKB_FIELDCAT_MERGE'
+    EXPORTING
+      i_callback_program     = sy-repid
+      i_tabname              = 'GS_RENT'
+      i_inclname             = sy-repid
+    CHANGING
+      ct_fieldcat            = lt_fieldcat
+    EXCEPTIONS
+      inconsistent_interface = 1
+      OTHERS                 = 2.
+
+  IF sy-subrc = 0.
+    CALL FUNCTION 'LVC_TRANSFER_FROM_KKBLO'
+      EXPORTING
+        it_fieldcat_kkblo = lt_fieldcat
+      IMPORTING
+        et_fieldcat_lvc   = gt_field_cat.
+
+  ENDIF.
+
+
+  IF sy-subrc &lt;&gt; 0.
+<font color ="#0000FF">* Implement suitable error handling here</font>
+  ENDIF.
+
+
+
+  LOOP AT gt_field_cat INTO gs_field_cat.
+
+    CASE gs_field_cat-fieldname.
+      WHEN 'LIGHT'.
+        gs_field_cat-coltext = '상태'.
+      WHEN 'MB_NM'.
+        gs_field_cat-coltext = '회원이름'.
+        gs_field_cat-key = 'X'.
+      WHEN 'BOOK_ID'.
+        gs_field_cat-coltext = '도서번호'.
+        gs_field_cat-outputlen = 10.
+        gs_field_cat-key = ''.
+      WHEN 'RENT_DT'.
+        gs_field_cat-coltext = '대여일'.
+        gs_field_cat-outputlen = 10.
+        gs_field_cat-key = ''.
+      WHEN 'MB_ID'.
+        gs_field_cat-just = 'L'.
+      WHEN 'MB_ST'.
+        gs_field_cat-no_out = 'X'.
+      WHEN 'RPLAN_DT'.
+        gs_field_cat-coltext = '반납예정일'.
+      WHEN 'RETURN_ST'.
+        gs_field_cat-coltext = '반납여부'.
+        gs_field_cat-no_out = 'X'.
+      WHEN 'RETURN_ST_TXT'.
+        gs_field_cat-coltext = '반납여부'.
+        gs_field_cat-outputlen = 10.
+      WHEN 'RETURN_DT'.
+        gs_field_cat-coltext = '반납완료일'.
+
+
+    ENDCASE.
+
+    MODIFY gt_field_cat FROM gs_field_cat.
+
+  ENDLOOP.
+ENDFORM.
+
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_field_02</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_field_02 .
+  DATA : lt_fieldcat TYPE kkblo_t_fieldcat.
+
+  CALL FUNCTION 'K_KKB_FIELDCAT_MERGE'
+    EXPORTING
+      i_callback_program     = sy-repid
+      i_tabname              = 'GS_MEMBER'
+      i_inclname             = sy-repid
+    CHANGING
+      ct_fieldcat            = lt_fieldcat
+    EXCEPTIONS
+      inconsistent_interface = 1
+      OTHERS                 = 2.
+
+  IF sy-subrc = 0.
+    CALL FUNCTION 'LVC_TRANSFER_FROM_KKBLO'
+      EXPORTING
+        it_fieldcat_kkblo = lt_fieldcat
+      IMPORTING
+        et_fieldcat_lvc   = gt_field_cat_02.
+
+  ENDIF.
+
+  LOOP AT gt_field_cat_02 INTO gs_field_cat_02.
+
+    CASE gs_field_cat_02-fieldname.
+      WHEN 'MB_NM'.
+        gs_field_cat_02-coltext = '회원이름'.
+        gs_field_cat_02-key = 'X'.
+
+    ENDCASE.
+
+    MODIFY gt_field_cat_02 FROM gs_field_cat_02.
+  ENDLOOP.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_display</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_display .
+
+  gs_layout-excp_fname = 'LIGHT'.
+  gs_layout-excp_led = 'X'.
+  gs_layout-zebra = 'X'.
+  gs_layout-cwidth_opt = 'X'.
+  gs_layout-sel_mode = 'A'.
+
+  gs_variant-report = sy-cprog. "프로그램 이름
+<font color ="#0000FF">*  gs_variant-variant =</font>
+  gs_save = 'A'.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_alv_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM  make_data.
+  LOOP AT gt_rent INTO gs_rent.
+    " 1) 라이트 적용
+    IF gs_rent-rplan_dt &lt; sy-datum AND gs_rent-return_st ='A'.
+      gs_rent-light = '1'. "빨간색
+    ELSEIF gs_rent-rplan_dt &gt;= sy-datum AND gs_rent-return_st ='A'.
+      gs_rent-light = '2'. "노란색
+    ELSEIF gs_rent-return_st ='B'.
+      gs_rent-light = '3'. "초록색
+    ENDIF.
+    MODIFY gt_rent FROM gs_rent TRANSPORTING light.
+  ENDLOOP.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_data .
+  DATA : lv_lin TYPE i.
+  DESCRIBE TABLE gt_rent LINES lv_lin.
+  DESCRIBE TABLE gt_member LINES lv_lin.
+
+  CASE 'X'.
+    WHEN p1.
+      IF gt_rent IS NOT INITIAL.
+        MESSAGE s002 WITH lv_lin."sy-tfill.   "&건의 데이터가 조회되었습니다.
+        CALL SCREEN 100.
+      ELSE.
+        MESSAGE e001.
+        LEAVE TO LIST-PROCESSING.
+      ENDIF.
+
+    WHEN p2.
+      IF gt_member IS NOT INITIAL.
+        MESSAGE s002 WITH lv_lin."sy-tfill.   "&건의 데이터가 조회되었습니다.
+        CALL SCREEN 200.
+      ELSE.
+        MESSAGE e001.
+        LEAVE TO LIST-PROCESSING.
+      ENDIF.
+
+  ENDCASE.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form radio</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM radio .
+  LOOP AT SCREEN.
+    CASE screen-group1.
+      WHEN 'FG'.
+        IF p1 = 'X'.
+          screen-active = '1'.
+        ELSE.
+          screen-active = '0'.
+        ENDIF.
+      WHEN 'PF'.
+        IF p2 = 'X'.
+          screen-active = '1'.
+        ELSE.
+          screen-active = '0'.
+        ENDIF.
+    ENDCASE.
+    MODIFY SCREEN.
+  ENDLOOP.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_conalv</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_conalv .
+  IF go_cont IS INITIAL.
+
+    "1. custom control area 에 container 를 link
+    CREATE OBJECT go_cont   "constructor method 가 호출
+      EXPORTING
+        container_name = 'AREA'
+      EXCEPTIONS
+        OTHERS         = 1.
+
+    IF sy-subrc &lt;&gt; 0.
+
+    ENDIF.
+
+    "2. container 에 grid 를 link.
+    CREATE OBJECT go_grid
+      EXPORTING
+        i_parent = go_cont
+      EXCEPTIONS
+        OTHERS   = 1.
+
+    IF sy-subrc &lt;&gt; 0.
+
+    ENDIF.
+  ENDIF.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_display2</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_display2 .
+
+  gs_layout_02-grid_title = '도서대여 회원내역'.
+  gs_layout_02-smalltitle = 'X'.
+  gs_layout_02-sel_mode = 'A'.
+  gs_layout_02-zebra = 'X'.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_handler</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_handler .
+  SET HANDLER lcl_event_handler=&gt;handle_double_click FOR go_grid01.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form double_click</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_ROW</font>
+<font color ="#0000FF">*&      --&gt; E_COLUMN</font>
+<font color ="#0000FF">*&      --&gt; ES_ROW_NO</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM double_click  USING    pv_row TYPE lvc_s_row
+                            pv_column
+                            pv_row_no TYPE lvc_s_roid.
+
+  READ TABLE gt_member INTO gs_member INDEX pv_row_no-row_id.
+
+  SELECT
+    a~mb_id
+    a~book_id
+    b~book_nm
+    a~rent_dt
+    a~rplan_dt
+    INTO CORRESPONDING FIELDS OF TABLE gt_return
+     FROM ztrent_b23 AS a
+    INNER JOIN ztbook_b23 AS b
+    ON a~book_id = b~book_id
+    INNER JOIN ztmember_b23 AS c
+    ON c~mb_id = a~mb_id
+    WHERE a~mb_id = gs_member-mb_id
+    AND a~return_st = 'A'.
+
+
+  PERFORM set_field_03.
+  PERFORM get_over_fee.
+  PERFORM call_alv_03.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_domain_value</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_domain_value .
+
+  LOOP AT gt_rent INTO gs_rent.
+
+    CALL FUNCTION 'STF4_GET_DOMAIN_VALUE_TEXT'
+      EXPORTING
+        iv_domname    = 'ZD_RST_B23'
+        iv_value      = gs_rent-return_st
+      IMPORTING
+        ev_value_text = gs_rent-return_st_txt.
+
+    MODIFY gt_rent FROM gs_rent TRANSPORTING return_st_txt.
+
+  ENDLOOP.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_field_03</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_field_03 .
+
+  DATA : lt_fieldcat TYPE kkblo_t_fieldcat.
+
+  CALL FUNCTION 'K_KKB_FIELDCAT_MERGE'
+    EXPORTING
+      i_callback_program     = sy-repid
+      i_tabname              = 'GS_RETURN'
+      i_inclname             = sy-repid
+    CHANGING
+      ct_fieldcat            = lt_fieldcat
+    EXCEPTIONS
+      inconsistent_interface = 1
+      OTHERS                 = 2.
+
+  IF sy-subrc = 0.
+    CALL FUNCTION 'LVC_TRANSFER_FROM_KKBLO'
+      EXPORTING
+        it_fieldcat_kkblo = lt_fieldcat
+      IMPORTING
+        et_fieldcat_lvc   = gt_field_cat_03.
+
+  ENDIF.
+
+  LOOP AT gt_field_cat_03 INTO gs_field_cat_03.
+    CASE gs_field_cat_03-fieldname.
+      WHEN 'BOOK_ID'.
+        gs_field_cat_03-coltext = '도서번호'.
+        gs_field_cat_03-outputlen = 10.
+        gs_field_cat_03-key = 'X'.
+
+      WHEN 'BOOK_NM'.
+        gs_field_cat_03-coltext = '도서명'.
+        gs_field_cat_03-outputlen = 20.
+        gs_field_cat_03-key = 'X'.
+
+      WHEN 'RENT_DT'.
+        gs_field_cat_03-coltext = '대여일'.
+        gs_field_cat_03-outputlen = 10.
+        gs_field_cat_03-key = ''.
+
+      WHEN 'RPLAN_DT'.
+        gs_field_cat_03-coltext = '반납예정일'.
+        gs_field_cat_03-outputlen = 10.
+        gs_field_cat_03-key = ''.
+
+      WHEN  'RENTFEE'.
+        gs_field_cat_03-coltext = '연체료'.
+        gs_field_cat_03-outputlen = 15.
+        gs_field_cat_03-key = ''.
+        gs_field_cat_03-do_sum = 'X'.
+
+      WHEN 'CURRENCY'.
+        gs_field_cat_03-coltext = '통화'.
+        gs_field_cat_03-outputlen = 5.
+        gs_field_cat_03-key = ''.
+
+      WHEN 'RETURN_ST'.
+        gs_field_cat_03-no_out = 'X'.
+
+      WHEN 'MB_ID'.
+        gs_field_cat_03-no_out = 'X'.
+    ENDCASE.
+
+    MODIFY gt_field_cat_03 FROM gs_field_cat_03.
+
+  ENDLOOP.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_over_fee</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_over_fee .
+  DATA: lv_over_days TYPE i,
+        lv_over_fee  TYPE i.
+
+  LOOP AT gt_return INTO gs_return.
+
+    IF sy-datum &lt; gs_return-rplan_dt.
+      lv_over_days = 0.
+    ELSE.
+      lv_over_days = sy-datum - gs_return-rplan_dt.
+      lv_over_fee = lv_over_days * 300.
+      gs_return-rentfee = lv_over_fee.
+      gs_return-currency = 'KRW'.
+      gs_field_color-fname = 'RENTFEE'.
+      gs_field_color-color-col = col_negative.
+      gs_field_color-color-int = '0'.
+      gs_field_color-color-inv = '0'.
+
+      APPEND gs_field_color TO gs_return-cell_color.
+    ENDIF.
+
+    MODIFY gt_return FROM gs_return TRANSPORTING rentfee cell_color currency.
+
+  ENDLOOP.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form call_alv_03</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM call_alv_03 .
+
+  PERFORM set_handler_02.
+  PERFORM set_display_03.
+
+  CALL METHOD go_grid02-&gt;set_table_for_first_display
+    EXPORTING
+      i_buffer_active    = 'X'
+      i_bypassing_buffer = 'X'
+<font color ="#0000FF">*     i_consistency_check           =</font>
+<font color ="#0000FF">*     i_structure_name   = 'ZTRENT_B23'</font>
+<font color ="#0000FF">*     is_variant         =</font>
+      i_save             = 'A'
+<font color ="#0000FF">*     i_default          = 'X'</font>
+      is_layout          = gs_layout_03
+<font color ="#0000FF">*     is_print           =</font>
+<font color ="#0000FF">*     it_special_groups  =</font>
+<font color ="#0000FF">*     it_toolbar_excluding          =</font>
+<font color ="#0000FF">*     it_hyperlink       =</font>
+<font color ="#0000FF">*     it_alv_graphics    =</font>
+<font color ="#0000FF">*     it_except_qinfo    =</font>
+<font color ="#0000FF">*     ir_salv_adapter    =</font>
+    CHANGING
+      it_outtab          = gt_return[]
+      it_fieldcatalog    = gt_field_cat_03.
+<font color ="#0000FF">*    it_sort                       =</font>
+<font color ="#0000FF">*    it_filter                     =</font>
+<font color ="#0000FF">*  EXCEPTIONS</font>
+<font color ="#0000FF">*    invalid_parameter_combination = 1</font>
+<font color ="#0000FF">*    program_error                 = 2</font>
+<font color ="#0000FF">*    too_many_lines                = 3</font>
+<font color ="#0000FF">*    others                        = 4</font>
+
+  IF sy-subrc &lt;&gt; 0.
+
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_handler_02</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_handler_02 .
+
+  SET HANDLER lcl_event_handler=&gt;handle_on_toolbar FOR go_grid02.
+  SET HANDLER lcl_event_handler=&gt;handle_user_command FOR go_grid02.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_display_03</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_display_03 .
+  gs_layout_03-grid_title = '도서대여 회원내역'.
+  gs_layout_03-sel_mode = 'A'.
+  gs_layout_03-ctab_fname = 'CELL_COLOR'.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form toolbar</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_OBJECT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM toolbar  USING pv_object TYPE REF TO cl_alv_event_toolbar_set.
+
+  DATA ls_button TYPE stb_button.
+
+  ls_button-butn_type = 3.
+  INSERT ls_button INTO TABLE pv_object-&gt;mt_toolbar.
+
+  CLEAR ls_button.
+  ls_button-function = 'RETURN'.
+  ls_button-text = '반납처리'.
+  ls_button-icon = '@CT@'.
+  ls_button-butn_type = 0.
+  INSERT ls_button INTO TABLE pv_object-&gt;mt_toolbar.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form user_command</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_UCOMM</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM user_command  USING pv_ucomm TYPE sy-ucomm.
+
+  CASE pv_ucomm.
+    WHEN 'RETURN'.
+      PERFORM return_book.
+  ENDCASE.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form return_book</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM return_book .
+
+  DATA : lt_row_id TYPE lvc_t_roid,
+         ls_row_id TYPE lvc_s_roid.
+
+  DATA : ls_rent TYPE ztrent_b23,
+         lt_rent TYPE TABLE OF ztrent_b23.
+
+  DATA : lv_answer TYPE c LENGTH 1.
+
+  CALL METHOD go_grid02-&gt;get_selected_rows
+    IMPORTING
+<font color ="#0000FF">*     et_index_rows =</font>
+      et_row_no = lt_row_id.
+
+  IF lines( lt_row_id ) = 1. "인터널 테이블 라인수 반환해주는 내장 함수
+    LOOP AT lt_row_id INTO ls_row_id.
+      READ TABLE gt_return INTO gs_return INDEX ls_row_id-row_id.
+
+      SELECT SINGLE * INTO CORRESPONDING FIELDS OF ls_rent
+        FROM ztrent_b23
+        WHERE mb_id = gs_return-mb_id
+        AND book_id = gs_return-book_id
+        AND rent_dt = gs_return-rent_dt
+        AND return_st &lt;&gt; 'B'.
+
+    ENDLOOP.
+
+    CALL FUNCTION 'POPUP_TO_CONFIRM'
+      EXPORTING
+        titlebar              = '반납처리확인'
+        text_question         = '해당 대여건을 반납 처리하시겠습니까?'
+        text_button_1         = '네'
+        text_button_2         = '아니오'
+        display_cancel_button = ''
+      IMPORTING
+        answer                = lv_answer.
+
+    IF lv_answer = 1. "네 선택시
+
+      ls_rent-return_st = 'B'.             "대여정보 데이터 베이스 업데이트 진행
+      ls_rent-return_dt = sy-datum.
+      ls_rent-changed_by = sy-uname.
+      ls_rent-changed_on = sy-datum.
+      ls_rent-changed_time = sy-uzeit.
+
+      APPEND ls_rent TO lt_rent.
+      MODIFY ztrent_b23 FROM TABLE lt_rent.
+
+      IF sy-subrc = 0.
+        MESSAGE TEXT-003 TYPE 'S'.
+
+        DELETE gt_return INDEX ls_row_id-row_id.
+
+
+        PERFORM refresh_alv_grid.
+
+      ELSE.
+        MESSAGE TEXT-004 TYPE 'E'.
+
+      ENDIF.
+
+    ELSE.
+      MESSAGE TEXT-005 TYPE 'E'.
+
+    ENDIF.
+
+  ELSEIF lines( lt_row_id ) = 0.
+    MESSAGE TEXT-006 TYPE 'S' DISPLAY LIKE 'E'.
+
+  ELSE.
+    MESSAGE TEXT-007 TYPE 'E'.
+
+  ENDIF.
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form refresh_alv_grid</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM refresh_alv_grid .
+
+  CALL METHOD go_grid02-&gt;refresh_table_display
+<font color ="#0000FF">*    EXPORTING</font>
+<font color ="#0000FF">*      is_stable      =</font>
+<font color ="#0000FF">*      i_soft_refresh =</font>
+<font color ="#0000FF">*    EXCEPTIONS</font>
+<font color ="#0000FF">*      finished       = 1</font>
+<font color ="#0000FF">*      others         = 2</font>
+    .
+  IF sy-subrc &lt;&gt; 0.
+
+  ENDIF.
+
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

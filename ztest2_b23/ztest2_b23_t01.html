@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZTEST2_B23_T01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZTEST2_B23_T01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZTASK2_B23_TOP</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZTEST2_B23_TOP</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+
+TABLES : scarr, spfli, sbook, sscrfields.
+
+DATA : gv_switch TYPE n VALUE '1'.
+
+DATA : BEGIN OF gs_flight,
+         carrid     LIKE scarr-carrid,
+         carrname   LIKE scarr-carrname,
+         connid     LIKE spfli-connid,
+         countryfr  LIKE spfli-countryfr,
+         countryto  LIKE spfli-countryto,
+         fldate     LIKE sbook-fldate,
+         customid   LIKE sbook-customid,
+         passname   LIKE sbook-passname,
+         bookid     LIKE sbook-bookid,
+         order_date LIKE sbook-order_date,
+         smoker     LIKE sbook-smoker,
+         cancelled  LIKE sbook-cancelled,
+
+         status     LIKE icon-id,
+         light      TYPE c,
+         cell_color TYPE lvc_t_scol,
+         color      TYPE c LENGTH 4,
+       END OF gs_flight.
+
+DATA : gt_flight LIKE TABLE OF gs_flight.
+
+
+DATA ok_code LIKE sy-ucomm.
+
+DATA : go_cont TYPE REF TO cl_gui_custom_container,
+       go_grid TYPE REF TO cl_gui_alv_grid.
+
+DATA : gs_layout      TYPE lvc_s_layo,
+       gs_field_color TYPE lvc_s_scol.
+
+DATA : gt_field_cat TYPE lvc_t_fcat,
+       gs_field_cat TYPE lvc_s_fcat.
+
+DATA : gt_sorting_criteria  TYPE lvc_t_sort,
+       gs_sorting_criterion TYPE lvc_s_sort.
+
+DATA : gt_filter TYPE lvc_t_filt,
+       gs_filter TYPE lvc_s_filt.
+
+DATA : go_dialogbox   TYPE REF TO cl_gui_dialogbox_container,
+       go_alv_booking TYPE REF TO cl_gui_alv_grid.
+
+DATA : gs_variant TYPE disvariant,
+       gs_save    TYPE c LENGTH 1.
+
+
+
+DATA : gs_spfli TYPE spfli,
+       gt_spfli TYPE TABLE OF spfli.
+
+
+SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE TEXT-001.
+  PARAMETERS : pa_car TYPE scarr-carrid DEFAULT 'AA'.
+
+  SELECT-OPTIONS : so_con FOR spfli-connid NO-EXTENSION,
+                   so_fdt FOR sbook-fldate NO-EXTENSION.
+
+  SELECTION-SCREEN SKIP 1.
+
+  SELECTION-SCREEN BEGIN OF LINE.
+    SELECTION-SCREEN PUSHBUTTON (10) btn_txt USER-COMMAND DETAILS.
+  SELECTION-SCREEN END OF LINE.
+
+  SELECTION-SCREEN SKIP 1.
+
+  SELECTION-SCREEN BEGIN OF BLOCK b2 WITH FRAME TITLE TEXT-002.
+    SELECT-OPTIONS : so_cid FOR sbook-customid MODIF ID btn,
+                     so_odt FOR sbook-order_date MODIF ID btn NO-EXTENSION.
+
+  SELECTION-SCREEN END OF BLOCK b2.
+SELECTION-SCREEN END OF BLOCK b1.
+
+PARAMETERS pa_lv TYPE disvariant-variant.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

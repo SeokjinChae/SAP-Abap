@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>MZ_MODULE_POOL_B23_O01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: MZ_MODULE_POOL_B23_O01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include MZ_MODULE_POOL_B23_O01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          MZ_MODULE_POOL_B23_O01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+
+MODULE status_0100 OUTPUT.
+  CASE 'X'.
+    WHEN view.
+      SET TITLEBAR 'TITLE_0100' WITH 'Display'.
+    WHEN maintain_flights.
+      SET TITLEBAR 'TITLE_0100' WITH 'Maintain Flights'.
+    WHEN maintain_bookings.
+      SET TITLEBAR 'TITLE_0100' WITH 'Maintain Bookings'.
+  ENDCASE.
+ENDMODULE.
+
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module STATUS_0150 OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& set status and title for screen 150</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE status_0150 OUTPUT.
+  SET PF-STATUS 'STATUS_0150'.
+  SET TITLEBAR 'TITLE_0150' WITH TEXT-to1.
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module CLEAR_OK_CODE OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& initialize ok_code</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE clear_ok_code OUTPUT.
+  CLEAR ok_code.
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module MOVE_TO_DYNP OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&  copy data to screen structure</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE move_to_dynp OUTPUT.
+  IF gs_sflight IS NOT INITIAL. "값이 있을 경우
+    MOVE-CORRESPONDING gs_sflight TO sdyn_conn.
+  ENDIF.
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module MODIFY_SCREEN OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& change elements dynamically</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE modify_screen OUTPUT.
+  IF maintain_flights = 'X'.
+    SET PF-STATUS 'STATUS_0100'.
+    LOOP AT SCREEN.
+      IF screen-name = 'SDYN_CONN-PLANETYPE'.
+        screen-input = 1.
+        MODIFY SCREEN.
+      ENDIF.
+    ENDLOOP.
+  ELSE.
+    SET PF-STATUS 'STATUS_0100' EXCLUDING 'SAVE'.
+  ENDIF.
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module FILL_DYNNR OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& determine subscreen number</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE fill_dynnr OUTPUT.
+  CASE my_tabstrip-activetab.
+    WHEN 'FC1'.
+      dynnr = 110.
+    WHEN 'FC2'.
+      dynnr = 120.
+    WHEN 'FC3'.
+      dynnr = 130.
+    WHEN OTHERS. "최초 화면 지정.
+      my_tabstrip-activetab = 'FC1'.
+      dynnr = 110.
+  ENDCASE.
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module GET_SPFLI OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& read SPFLI data from database</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE get_spfli OUTPUT.
+  SELECT SINGLE * FROM spfli
+    INTO CORRESPONDING FIELDS OF sdyn_conn
+    WHERE carrid =  gs_sflight-carrid
+    AND connid = gs_sflight-connid.
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module GET_SAPLANE OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& read SAPLANE data from database</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE get_saplane OUTPUT.
+  SELECT SINGLE * FROM saplane "화면 요소에 있는 saplane 이름과 타입이 동일하기 때문에 into saplane 생략가능
+    "from saplane: database table / into saplane: 구조를 가진
+    WHERE planetype = gs_sflight-planetype.
+ENDMODULE.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

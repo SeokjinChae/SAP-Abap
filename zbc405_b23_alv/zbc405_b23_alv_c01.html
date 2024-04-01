@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZBC405_B23_ALV_C01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZBC405_B23_ALV_C01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZBC405_B23_ALV_C01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+<font color ="#0000FF">***INCLUDE ZBC405_B23_ALV_C01.</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+<font color ="#0000FF">*CLASS : lcl_event_handler DEFINITION DEFERRED.</font>
+<font color ="#0000FF">*DATA : go_handler TYPE REF TO lcl_event_handler.   "local class 참조변수</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Class lcl_event_handler</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+CLASS lcl_event_handler DEFINITION." FINAL. (생략가능)
+
+  PUBLIC SECTION.
+<font color ="#0000FF">*- 메소드</font>
+    " [CLASS-METHODS : static]  =&gt; 클래스가 직접 접근 가능함
+<font color ="#0000FF">*    CLASS-METHODS handle_double_click</font>
+<font color ="#0000FF">*      FOR EVENT double_click OF cl_gui_alv_grid</font>
+<font color ="#0000FF">*      IMPORTING e_row e_column es_row_no.   "SE24</font>
+
+    " [METHODS : instance] -&gt;  참조변수 선언 , 객체 생성
+    METHODS handle_double_click
+      FOR EVENT double_click OF cl_gui_alv_grid
+      IMPORTING e_row e_column es_row_no.   "SE24에서 exporting parameter 확인
+
+    METHODS handle_hotspot_click
+      FOR EVENT hotspot_click OF cl_gui_alv_grid
+      IMPORTING e_row_id e_column_id es_row_no.
+
+    METHODS handle_print_top
+        FOR EVENT print_top_of_page OF cl_gui_alv_grid.
+
+    METHODS handle_print_list
+        FOR EVENT print_top_of_list OF cl_gui_alv_grid.
+
+    METHODS handle_on_toolbar
+      FOR EVENT toolbar OF cl_gui_alv_grid
+      IMPORTING e_object.
+
+    METHODS handle_user_command
+      FOR EVENT user_command OF cl_gui_alv_grid
+      IMPORTING e_ucomm.
+
+    METHODS handle_context_menu
+      FOR EVENT context_menu_request OF cl_gui_alv_grid
+      IMPORTING e_object.
+
+    CLASS-METHODS handle_button_click
+      FOR EVENT button_click OF cl_gui_alv_grid
+      IMPORTING es_col_id es_row_no.
+
+    CLASS-METHODS handle_close
+      FOR EVENT close OF cl_gui_dialogbox_container
+      IMPORTING sender.
+
+  PRIVATE SECTION.
+<font color ="#0000FF">*- 속성</font>
+    DATA : gv_rowid TYPE i.
+<font color ="#0000FF">*    CLASS-DATA : gv_rowid TYPE i.   "static</font>
+
+ENDCLASS.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Class (Implementation) LCL_event_handler</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+CLASS lcl_event_handler IMPLEMENTATION.
+
+  METHOD handle_double_click.
+    PERFORM double_click USING e_row." e_column es_row_no.
+  ENDMETHOD.
+
+  METHOD handle_hotspot_click.
+    PERFORM hotspot_click USING e_row_id e_column_id es_row_no.
+  ENDMETHOD.
+
+  METHOD handle_print_top.
+    PERFORM print_top.
+  ENDMETHOD.
+
+  METHOD handle_print_list.
+    PERFORM print_list.
+  ENDMETHOD.
+
+  METHOD handle_on_toolbar.
+    PERFORM on_toolbar USING e_object.
+  ENDMETHOD.
+
+  METHOD handle_user_command.
+    PERFORM user_command USING e_ucomm
+                               gv_rowid.     "context menu event 에서 받은 'index 값' 전달 및 처리
+  ENDMETHOD.
+
+  METHOD handle_context_menu.
+    PERFORM context_menu USING e_object
+                      CHANGING gv_rowid.     "전달받은 속성값 (다른 이벤트에서 받아서 활용)
+  ENDMETHOD.
+
+  METHOD handle_button_click.
+    PERFORM button_click USING es_col_id es_row_no.
+  ENDMETHOD.
+
+  METHOD handle_close.
+    sender-&gt;free( ).
+    FREE: go_dialogbox,
+          go_alv_booking.
+  ENDMETHOD.
+
+ENDCLASS.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

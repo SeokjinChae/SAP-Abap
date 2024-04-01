@@ -1,0 +1,93 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZB23_MODIFY_SCREEN</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZB23_MODIFY_SCREEN</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Program ZB15_MODIFY_SCREEN</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZB15_MODIFY_SCREEN</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zb23_modify_screen.
+
+<font color ="#0000FF">*---------</font>
+<font color ="#0000FF">* top</font>
+<font color ="#0000FF">*---------</font>
+
+TABLES: sflight, spfli. "사용할 테이블 선언
+
+SELECTION-SCREEN BEGIN OF BLOCK bl_opt WITH FRAME TITLE TEXT-tlo. "첫번째 radio 버튼 블락
+  PARAMETERS: p1 USER-COMMAND radio RADIOBUTTON GROUP cnt1 DEFAULT 'X', "sflight기본선택
+              p2 RADIOBUTTON GROUP cnt1.
+SELECTION-SCREEN END OF BLOCK bl_opt.
+
+SELECTION-SCREEN SKIP 1.
+
+SELECTION-SCREEN BEGIN OF BLOCK bl_field WITH FRAME TITLE TEXT-tlf. "두번째 바뀌는 블락
+  PARAMETERS: so_car LIKE sflight-carrid MODIF ID fg , "fg = 펑션코드
+              so_con LIKE sflight-connid MODIF ID fg , "No.. 대신에 parameter로 해도 상관 ㄴ
+              so_fld LIKE sflight-fldate MODIF ID fg .
+
+  SELECT-OPTIONS: so_car2 FOR spfli-carrid MODIF ID pf , "얘넨 select-options로
+                  so_con2 FOR spfli-connid MODIF ID pf . "pf = 펑션코드
+
+SELECTION-SCREEN END OF BLOCK bl_field.
+
+
+<font color ="#0000FF">*-------</font>
+<font color ="#0000FF">* event</font>
+<font color ="#0000FF">*-------</font>
+
+AT SELECTION-SCREEN OUTPUT. "pbo - 라디오 버튼 클릭 시 실행
+  LOOP AT SCREEN.
+    CASE screen-group1. "function code별 case
+      WHEN 'FG'.
+        IF p1 = 'X'. "펑션코드 확인 + 라디오 버튼 클릭까지 확인 시
+          screen-active = '1'. "눈에 보이도록 설정
+          IF screen-name CS 'SO_CON'. "name에 so_con contain(포함) 될 때 = 걍 name이 so_con인 필드만 속성 적용해준다고 생각
+            screen-values_in_COMBO = '1'. " 콤보박스로 만들어줌
+          ENDIF.
+        ELSE. "만약 라디오버튼 클릭 ㄴ = X가아님 = 빈값 ""
+          screen-active = '0'. "눈에 안보이도록
+        ENDIF.
+      WHEN 'PF'.
+        IF p2 = 'X'.
+          screen-active = '1'.
+          IF screen-name CS 'SO_CAR2'.
+            screen-intensified = '1'.
+          ENDIF.
+        ELSE.
+          screen-active = '0'.
+        ENDIF.
+    ENDCASE.
+    MODIFY SCREEN. "케이스문 이후 modify screen
+  ENDLOOP.
+
+<font color ="#0000FF">*Text elements</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* TLF 조회필드</font>
+<font color ="#0000FF">* TLO 조회기준</font>
+<font color ="#0000FF">* TLV 조회기준</font>
+
+
+<font color ="#0000FF">*Selection texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* P1         SFLIGHTS</font>
+<font color ="#0000FF">* P2         SPFLI</font>
+<font color ="#0000FF">* SO_CAR         SFLIGHTS(carrid)</font>
+<font color ="#0000FF">* SO_CAR2         SPFLI(carrid)</font>
+<font color ="#0000FF">* SO_CON         SFLIGHTS(connid)</font>
+<font color ="#0000FF">* SO_CON2         SPFLI(connid)</font>
+<font color ="#0000FF">* SO_FLD         SFLIGHTS(fldate)</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

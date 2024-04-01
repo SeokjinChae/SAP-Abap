@@ -1,0 +1,399 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZTASK_B23_F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZTASK_B23_F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZTASK_B23_F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZTASK_B23_F01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form GET_DATA</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& 조회 조건에 맞는 데이터 조회</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data.
+  SELECT c~carrid c~carrname p~connid p~countryfr p~countryto
+    b~fldate b~customid b~passname b~bookid b~order_date b~smoker b~cancelled
+    INTO CORRESPONDING FIELDS OF TABLE gt_flight
+
+    FROM scarr AS c
+    INNER JOIN spfli AS p
+    ON c~carrid EQ p~carrid
+    INNER JOIN sbook AS b
+    ON p~connid EQ b~connid
+
+    WHERE c~carrid EQ pv_carid
+    AND p~connid IN so_conid
+    AND b~fldate IN so_fdate
+
+    AND b~customid IN so_cusid
+    AND b~order_date IN so_odate.
+
+  IF sy-subrc &lt;&gt; 0.
+    MESSAGE s001.
+    EXIT.
+  ELSE.
+    MESSAGE s002 WITH sy-tfill.
+  ENDIF.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form MAKE_DATA</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& 데이터 가공 및 처리</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM make_data.
+  LOOP AT gt_flight INTO gs_flight.
+
+    " STATUS - 비행 일정 완료 여부
+    IF gs_flight-fldate &lt; sy-datum.
+      gs_flight-status = icon_checked.
+    ELSE.
+      gs_flight-status = icon_space.
+    ENDIF.
+
+    " LIGHT - 예약 여부
+    IF gs_flight-cancelled = 'X'.
+      gs_flight-light = '1'.
+      gs_flight-line_color = 'C610'.
+    ELSE.
+      gs_flight-light = '3'.
+    ENDIF.
+
+    " SMOKER - 흡연 여부
+    IF gs_flight-smoker = 'X'.
+      gs_fieldcol-fname = 'SMOKER'.
+      gs_fieldcol-color-col = col_negative.
+      gs_fieldcol-color-inv = 0.
+      APPEND gs_fieldcol TO gs_flight-cell_color.
+    ENDIF.
+
+    MODIFY gt_flight FROM gs_flight
+      TRANSPORTING status light line_color cell_color.
+  ENDLOOP.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form DISPLAY_DATA</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& 데이터 출력</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_data.
+  CALL SCREEN 100.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form CREATE_GRID</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& CONTAINER OBJECT 생성 + ALV GRID 생성 + 연결</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM create_grid.
+
+  CREATE OBJECT go_cont
+    EXPORTING
+      container_name = 'CONT'.
+
+
+  CREATE OBJECT go_grid
+    EXPORTING
+      i_parent = go_cont.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form DISPLAY_GRID</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& ALV GRID 출력</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_grid.
+  CALL METHOD go_grid-&gt;set_table_for_first_display
+    EXPORTING
+<font color ="#0000FF">*     i_structure_name = 'SFLIGHT' "아웃풋 테이블 필드</font>
+      is_layout       = gs_layout "레이아웃
+    CHANGING
+      it_outtab       = gt_flight "화면 출력 데이터
+      it_fieldcatalog = gt_fieldcat "필드 카탈로그
+      it_sort         = gt_sort "정렬
+      it_filter       = gt_filter. "필터링
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form CREATE_CATALOG</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& 인터널 테이블 필드로 필드 카탈로그 생성</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM create_catalog.
+  DATA: lt_fieldcat TYPE kkblo_t_fieldcat.
+
+  CALL FUNCTION 'K_KKB_FIELDCAT_MERGE'
+    EXPORTING
+      i_callback_program     = sy-repid
+      i_tabname              = 'GS_FLIGHT'
+      i_inclname             = sy-repid
+      i_bypassing_buffer     = abap_on
+      i_buffer_active        = abap_off
+    CHANGING
+      ct_fieldcat            = lt_fieldcat
+    EXCEPTIONS
+      inconsistent_interface = 1
+      OTHERS                 = 2.
+
+  IF sy-subrc EQ 0.
+    CALL FUNCTION 'LVC_TRANSFER_FROM_KKBLO'
+      EXPORTING
+        it_fieldcat_kkblo = lt_fieldcat
+      IMPORTING
+        et_fieldcat_lvc   = gt_fieldcat
+      EXCEPTIONS
+        it_data_missing   = 1
+        OTHERS            = 2.
+  ENDIF.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form SET_CATALOG</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& 카탈로그 구성</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_catalog.
+  DATA ls_fieldcat TYPE lvc_s_fcat.
+
+  LOOP AT gt_fieldcat INTO ls_fieldcat.
+    " STATUS 필드명 + OUPUT 순서 + 정렬
+    IF ls_fieldcat-fieldname = 'STATUS'.
+      ls_fieldcat-coltext = '일정완료여부'.
+      ls_fieldcat-col_pos = 0.
+      ls_fieldcat-just = 'C'. "가운데
+      MODIFY gt_fieldcat FROM ls_fieldcat.
+    ENDIF.
+    " LIGHT 필드명
+    IF ls_fieldcat-fieldname = 'LIGHT'.
+      ls_fieldcat-coltext = '예약상태'.
+      MODIFY gt_fieldcat FROM ls_fieldcat.
+    ENDIF.
+    " CANCELLED 필드 숨김 처리
+    IF ls_fieldcat-fieldname = 'CANCELLED'.
+      ls_fieldcat-no_out = 'X'.
+      MODIFY gt_fieldcat FROM ls_fieldcat.
+    ENDIF.
+    " SMOKER 필드 체크박스 + OUTPUT 순서
+    IF ls_fieldcat-fieldname = 'SMOKER'.
+      ls_fieldcat-checkbox = 'X'.
+      ls_fieldcat-col_pos = 8.
+      MODIFY gt_fieldcat FROM ls_fieldcat.
+    ENDIF.
+    " BOOKID 필드 HOTSPOT 이벤트
+    IF ls_fieldcat-fieldname = 'BOOKID'.
+      ls_fieldcat-hotspot = 'X'.
+      MODIFY gt_fieldcat FROM ls_fieldcat.
+    ENDIF.
+  ENDLOOP.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form SET_LAYOUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& ALV GRID 요소 Layout 설정</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_layout.
+  gs_layout-excp_fname = 'LIGHT'. " 예외사항 필드 변경
+  gs_layout-ctab_fname = 'CELL_COLOR'. " 필드 셀 색상 설정
+  gs_layout-info_fname = 'LINE_COLOR'. " 라인 색상 설정
+  gs_layout-cwidth_opt = 'X'. " 컬럼 길이 자동조절
+
+  gs_layout-sel_mode = 'D'. " 선택 모드 : 멀티 선택 가능
+  gs_layout-zebra = 'X'. " 줄무늬 패턴
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form SET_SORT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& ALV GRID 요소 정렬 설정</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_sort.
+  DATA: ls_sort TYPE lvc_s_sort.
+
+  " CUSTMOMID를 기준으로 오름차순 정렬
+  ls_sort-fieldname = 'CUSTOMID'.
+  ls_sort-up = 'X'.
+  APPEND ls_sort TO gt_sort.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form SET_FLITER</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& ALV GRID 요소 필터링 설정</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_fliter USING pv_fieldname.
+  DATA: ls_filter TYPE lvc_s_filt.
+  " 인자로 받은 필드명과 동일한 필드명의 값이 'X' 인 데이터 필터 설정
+  ls_filter-fieldname = pv_fieldname.
+  ls_filter-sign = 'I'.
+  ls_filter-option = 'EQ'.
+  ls_filter-low = 'X'.
+
+  APPEND ls_filter TO gt_filter.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form SET_HANDLER</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& ALV GRID 이벤트 핸들러 설정</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_handler.
+  CREATE OBJECT go_handler.
+  SET HANDLER: go_handler-&gt;handle_toolbar FOR go_grid,
+               go_handler-&gt;handle_double_click FOR go_grid,
+               go_handler-&gt;handle_hotspot_click FOR go_grid,
+               go_handler-&gt;handle_user_command FOR go_grid.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form double_click</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& ALV GRID Double CLICK 이벤트 핸들러</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_ROW</font>
+<font color ="#0000FF">*&      --&gt; E_COLUMN</font>
+<font color ="#0000FF">*&      --&gt; ES_ROW_NO</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM double_click  USING    p_row TYPE lvc_s_row
+                            p_column TYPE lvc_s_col
+                            ps_row_no TYPE lvc_s_roid.
+  "선택한 행 ID를 INDEX 조건으로 인터널 테이블 데이터 조회
+  READ TABLE gt_flight INTO gs_flight INDEX ps_row_no-row_id.
+
+  " 조회된 데이터와 일치하는 항공 예약 DB 데이터 조회
+  SELECT SINGLE * FROM spfli INTO CORRESPONDING FIELDS OF gs_booking
+    WHERE carrid = gs_flight-carrid AND
+          connid = gs_flight-connid.
+
+  " 조회 데이터를 모달 다이얼로그 박스 스크린으로 출력
+  CALL SCREEN 110 STARTING AT 10 08
+                  ENDING AT 70 15.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form user_command</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& ALV GRID USER COMMAND 이벤트 핸들러</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_UCOMM</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM user_command  USING    p_e_ucomm.
+  DATA: l_scroll TYPE lvc_s_stbl.
+
+  CASE p_e_ucomm.
+    WHEN 'SMOKER'.
+      PERFORM set_fliter USING 'SMOKER'. "흡연자 필드 필터링 설정
+
+      PERFORM display_grid. "GRID 출력
+    WHEN 'CANCELLED'.
+      PERFORM set_fliter USING 'CANCELLED'."예약 취소 필드 필터링 설정
+
+      PERFORM display_grid. "GRID 출력
+    WHEN 'REFRESH'.
+      "선택한 행/렬 초기화
+      l_scroll-row = 'X'.
+      l_scroll-col = 'X'.
+      CALL METHOD go_grid-&gt;refresh_table_display
+        EXPORTING
+          is_stable      = l_scroll
+          i_soft_refresh = ' '.
+      "필터 초기화
+      CLEAR gt_filter.
+      "GRID 출력
+      PERFORM display_grid.
+  ENDCASE.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form hotspot_click</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& ALV GRID HOTSPOT 이벤트 핸들러</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_ROW_ID</font>
+<font color ="#0000FF">*&      --&gt; E_COLUMN_ID</font>
+<font color ="#0000FF">*&      --&gt; ES_ROW_NO</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM hotspot_click  USING    p_row_id TYPE lvc_s_row
+                             p_column_id TYPE lvc_s_col
+                             ps_row_no TYPE lvc_s_roid  .
+  "선택한 row id를 index 조건으로 인터널 테이블 데이터 조회
+  READ TABLE gt_flight INTO gs_flight INDEX ps_row_no-row_id.
+
+  CASE p_column_id-fieldname.
+    WHEN 'BOOKID'. "예약번호 칼럼 클릭 시
+      MESSAGE i011 WITH gs_flight-fldate. "fldate 메세지 출력
+  ENDCASE.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form toolbar</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& ALV GRID toolbar 이벤트 핸들러</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_OBJECT</font>
+<font color ="#0000FF">*&      --&gt; E_INTERACTIVE</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM toolbar  USING   e_object TYPE REF TO cl_alv_event_toolbar_set
+                      e_interactive TYPE char01.
+  DATA: ls_toolbar TYPE stb_button.
+
+  CLEAR ls_toolbar.
+  " 초기화 툴바 구현
+  ls_toolbar-function = 'REFRESH'.
+  ls_toolbar-icon = icon_refresh.
+  ls_toolbar-quickinfo = 'Refresh'.
+  ls_toolbar-text = 'REFRESH'.
+  APPEND ls_toolbar TO e_object-&gt;mt_toolbar.
+
+  " 흡연자 조회 툴바 구현
+  CLEAR ls_toolbar.
+  ls_toolbar-function = 'SMOKER'.
+  ls_toolbar-icon = icon_negative.
+  ls_toolbar-quickinfo = 'Smoker'.
+  ls_toolbar-text = 'SMOKER'.
+  APPEND ls_toolbar TO e_object-&gt;mt_toolbar.
+
+  " 취소 예약 조회 툴바 구현
+  CLEAR ls_toolbar.
+  ls_toolbar-function = 'CANCELLED'.
+  ls_toolbar-icon = icon_cancel.
+  ls_toolbar-quickinfo = 'Cancelled Flight'.
+  ls_toolbar-text = 'CANCELLED FLIGHT'.
+  APPEND ls_toolbar TO e_object-&gt;mt_toolbar.
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

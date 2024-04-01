@@ -1,0 +1,78 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZALVSESSION_B23</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZALVSESSION_B23</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  왕초보세션 AVL 예제</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZALVSESSION_B23</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zalvsession_b23 MESSAGE-ID zb00.
+
+include <a href ="zalvsession_b23_alv_top.html">zalvsession_b23_alv_top</a>.
+
+include <a href ="zalvsession_b23_alv_c01.html">zalvsession_b23_alv_c01</a>.
+
+
+include <a href ="zalvsession_b23_alv_o01.html">zalvsession_b23_alv_o01</a>.
+
+include <a href ="zalvsession_b23_alv_i01.html">zalvsession_b23_alv_i01</a>.
+
+include <a href ="zalvsession_b23_alv_f01.html">zalvsession_b23_alv_f01</a>.
+
+
+
+START-OF-SELECTION.
+
+  PERFORM get_data.  "데이터베이스에서 조회조건을 기준으로 데이터를 가져온다.
+
+  LOOP AT gt_sflight INTO gs_sflight.
+
+    IF gs_sflight-fldate(4) = '2023'.
+      gs_color-fname     = 'FLDATE'.
+      gs_color-color-col = col_positive.
+      gs_color-color-int = 1.
+      gs_color-color-inv = 0.
+      gs_color-nokeycol = 'X'.
+      APPEND gs_color TO gs_sflight-it_col.
+    ENDIF.
+
+    MODIFY gt_sflight FROM gs_sflight TRANSPORTING it_col.
+  ENDLOOP.
+
+  IF gt_sflight IS NOT INITIAL.
+<font color ="#0000FF">*    MESSAGE s002.</font>
+    CALL SCREEN 100.
+  ELSE.
+<font color ="#0000FF">*    MESSAGE s000 WITH TEXT-s01.  "Text symbol과 함께...</font>
+    MESSAGE s001.
+    LEAVE TO LIST-PROCESSING.
+  ENDIF.
+
+<font color ="#0000FF">*GUI Texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* TITLE_0100 --&gt; 왕초보세션 ALV 예제</font>
+
+<font color ="#0000FF">*Text elements</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* T01 Search Conditions</font>
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZB00</font>
+<font color ="#0000FF">*001   조건에 만족하는 데이터가 없습니다.</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

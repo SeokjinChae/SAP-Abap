@@ -1,0 +1,165 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZB00_SELECTION_SCREEN</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZB00_SELECTION_SCREEN</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Example of SELECTION_SCREEN</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZB00_SELECTION_SCREEN</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& selection screen 에 대한 제어</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zb00_selection_screen.
+
+TABLES : scarr, sscrfields.
+<font color ="#0000FF">*DATA : sscrfields TYPE sscrfields.</font>
+
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+<font color ="#0000FF">* SELECTION-SCREEN FUNCTION KEY pos</font>
+<font color ="#0000FF">* Application toolbar에 버튼 활성화</font>
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+SELECTION-SCREEN FUNCTION KEY 1.
+SELECTION-SCREEN FUNCTION KEY 2.
+
+
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+<font color ="#0000FF">* SELECTION-SCREEN BEGIN OF LINE. ~ SELECT-SCREEN END OF LINE</font>
+<font color ="#0000FF">* 파라미터를 여러 개 묶어서 한 라인으로 생성한다.</font>
+<font color ="#0000FF">* 라인에서 SELECT-OPTIONS, SELECTION-SCREEN SKIP n 구문을 사용할 수 없다.</font>
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+SELECTION-SCREEN BEGIN OF LINE.
+
+  SELECTION-SCREEN COMMENT 1(10) TEXT-001 FOR FIELD p_carr.
+
+  PARAMETERS : p_carr LIKE scarr-carrid.
+
+  SELECTION-SCREEN COMMENT 56(10) TEXT-001 FOR FIELD p_cname.
+  SELECTION-SCREEN POSITION POS_LOW.
+
+  PARAMETERS : p_cname LIKE scarr-carrname.
+
+SELECTION-SCREEN END OF LINE.
+
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+<font color ="#0000FF">*  SELECTION-SCREEN 화면 구성 제어</font>
+<font color ="#0000FF">*------------------------------------------- -------------------------*</font>
+SELECTION-SCREEN SKIP 2. " n줄씩 줄바꿈한다.
+
+SELECTION-SCREEN ULINE.  " Under-line 추가
+
+SELECTION-SCREEN ULINE /1(10).   " 1 point 부터 10 point 까지
+SELECTION-SCREEN ULINE pos_low(10).   " low 위치부터
+SELECTION-SCREEN ULINE pos_high(10).  " high 위치부터
+
+" push button + position  " SY-UCOMM = 'BTN1'.  -&gt; AT SELECTION-SCREEN
+SELECTION-SCREEN PUSHBUTTON /pos_low(10) TEXT-002 USER-COMMAND btn1.
+
+SELECTION-SCREEN SKIP 2.
+
+<font color ="#0000FF">*SY-UCOMM = 'BTN1'.  "기본형</font>
+<font color ="#0000FF">*SY-UCOMM = 'btn1'.</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+<font color ="#0000FF">*  SELECTION-SCREEN BEGIN OF BLOCK ~ SELECTION-SCREEN END OF BLOCK</font>
+<font color ="#0000FF">*  PARAMETER, SELEC-OPTIONS 등 블록 형성</font>
+<font color ="#0000FF">*  WITH FRAME는 프레임을 추가, TITLE title 프레임의 TITLE를 추가</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+SELECTION-SCREEN BEGIN OF BLOCK b1  WITH FRAME TITLE TEXT-b01  NO INTERVALS.
+  PARAMETERS     : pa_03 TYPE c.
+  SELECT-OPTIONS : so_01 FOR scarr-carrid.
+<font color ="#0000FF">*SELECTION-SCREEN END OF BLOCK b1.</font>
+
+  SELECTION-SCREEN SKIP 2.
+
+  SELECTION-SCREEN BEGIN OF BLOCK b2 WITH FRAME TITLE TEXT-b02." NO INTERVALS.
+    PARAMETERS     : pa_04 TYPE c.
+    SELECT-OPTIONS : so_02 FOR scarr-carrid.
+    SELECT-OPTIONS : so_04 FOR scarr-carrid.
+
+
+
+  SELECTION-SCREEN END OF BLOCK b2.
+
+
+SELECTION-SCREEN END OF BLOCK b1.
+
+
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+<font color ="#0000FF">* SELECTION-SCREEN BEGIN OF SCREEN ~ END OF SCREEN.</font>
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+SELECTION-SCREEN BEGIN OF SCREEN 1100.
+  PARAMETERS     : pa_05 TYPE c.
+  SELECT-OPTIONS : so_03 FOR scarr-carrid.
+SELECTION-SCREEN END OF SCREEN 1100.
+
+
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+<font color ="#0000FF">* SELECTION SCREEN EVENT  : 다른 프로그램 예시에서 계속...</font>
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+
+INITIALIZATION.
+
+  MOVE 'Function key 1' TO sscrfields-functxt_01.
+  MOVE 'Function key 2' TO sscrfields-functxt_02.
+
+AT SELECTION-SCREEN.  "selection scree의 전체에 대한 ....
+
+  IF sscrfields-ucomm = 'FC01'.
+<font color ="#0000FF">*    MESSAGE 'You clicked Function Key 1' TYPE 'I'.</font>
+    CALL SELECTION-SCREEN 1100
+    STARTING AT 5 5
+    ENDING AT 50 10.   "화면의 좌표
+  ENDIF.
+
+  IF sscrfields-ucomm = 'FC02'.
+<font color ="#0000FF">*    MESSAGE 'You clicked Function Key 2' TYPE 'I'.</font>
+    MESSAGE TEXT-m00 TYPE 'I'.   "S E W ...
+  ENDIF.
+
+  IF sscrfields-ucomm = 'BTN1'.
+    MESSAGE 'You clicked Function Key bnt1' TYPE 'I'.
+  ENDIF.
+
+AT SELECTION-SCREEN ON pa_04. " 특정한 필드에 한해서...
+  IF pa_04 = 'X'.
+    CALL SELECTION-SCREEN 1100
+        STARTING AT 5 5
+        ENDING AT 50 10.   "화면의 좌표
+
+    IF sy-subrc &lt;&gt; 0.
+      LEAVE TO SCREEN 1000.
+    ENDIF.
+
+  ENDIF.
+
+<font color ="#0000FF">*Text elements</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* 001 항공사코드</font>
+<font color ="#0000FF">* 002 low위치버튼</font>
+<font color ="#0000FF">* B01 block 1</font>
+<font color ="#0000FF">* B02 block 2</font>
+<font color ="#0000FF">* M00 You clicked Function Key 2</font>
+
+
+<font color ="#0000FF">*Selection texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* P_CARR         항공사코드</font>
+<font color ="#0000FF">* P_CNAME         항공사명</font>
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*YPE</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: Hard coded</font>
+<font color ="#0000FF">*   You clicked Function Key bnt1</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

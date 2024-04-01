@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZREXAM3_B23_T01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZREXAM3_B23_T01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZREXAM3_B23_T01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZREXAM3_B23_T01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+
+TABLES : ztmember_b23, ztbook_b23, ztrent_b23, sscrfields.
+<font color ="#0000FF">*-----------------------------------screen 100------------------------------*</font>
+DATA : BEGIN OF gs_rent,
+         mb_id         LIKE ztmember_b23-mb_id,
+         mb_nm         LIKE ztmember_b23-mb_nm,
+         mb_st         LIKE ztmember_b23-mb_st,
+         book_id       LIKE ztbook_b23-book_id,
+         book_nm       LIKE ztbook_b23-book_nm,
+         rent_dt       LIKE ztrent_b23-rent_dt,
+         rplan_dt      LIKE ztrent_b23-rplan_dt,
+         return_st     LIKE ztrent_b23-return_st,
+         return_st_txt LIKE dd07t-ddtext,
+         return_dt     LIKE ztrent_b23-return_dt,
+
+         light         TYPE c,
+
+       END OF gs_rent.
+
+DATA : gt_rent LIKE TABLE OF gs_rent.
+
+DATA  ok_code LIKE sy-ucomm.
+
+DATA : go_grid TYPE REF TO cl_gui_alv_grid.
+DATA : go_cont TYPE REF TO cl_gui_custom_container.
+
+DATA : gs_layout    TYPE lvc_s_layo.
+
+DATA : gt_field_cat TYPE lvc_t_fcat,
+       gs_field_cat TYPE lvc_s_fcat.
+
+DATA : gs_variant TYPE disvariant,
+       gs_save    TYPE c LENGTH 1.
+<font color ="#0000FF">*-----------------------------------screen 100------------------------------*</font>
+
+<font color ="#0000FF">*-----------------------------------screen 200------------------------------*</font>
+
+DATA : BEGIN OF gs_member,
+         mb_id LIKE ztmember_b23-mb_id,
+         mb_nm LIKE ztmember_b23-mb_nm,
+         telno LIKE ztmember_b23-telno,
+         email LIKE ztmember_b23-email,
+
+       END OF gs_member.
+
+DATA : gt_member LIKE TABLE OF gs_member.
+
+DATA : BEGIN OF gs_return,
+         mb_id      LIKE ztrent_b23-mb_id,
+         book_id    LIKE ztrent_b23-book_id,
+         book_nm    LIKE ztbook_b23-book_nm,
+         rent_dt    LIKE ztrent_b23-rent_dt,
+         rplan_dt   LIKE ztrent_b23-rplan_dt,
+         rentfee    TYPE i,
+         currency   TYPE currency,
+
+         cell_color TYPE lvc_t_scol,
+         return_st  TYPE ztrent_b11-return_st,
+
+       END OF gs_return.
+
+DATA : gt_return LIKE TABLE OF gs_return.
+
+
+DATA : gs_field_color TYPE lvc_s_scol.
+
+DATA : gs_layout_02 TYPE lvc_s_layo,
+       gs_layout_03 TYPE lvc_s_layo.
+
+DATA : gt_field_cat_02 TYPE lvc_t_fcat,
+       gs_field_cat_02 TYPE lvc_s_fcat.
+
+DATA : gt_field_cat_03 TYPE lvc_t_fcat,
+       gs_field_cat_03 TYPE lvc_s_fcat.
+
+DATA : go_dock_cont01 TYPE REF TO cl_gui_docking_container,
+       go_split       TYPE REF TO cl_gui_splitter_container.
+
+DATA : go_cont01 TYPE REF TO cl_gui_container,
+       go_cont02 TYPE REF TO cl_gui_container.
+
+DATA : go_grid01 TYPE REF TO cl_gui_alv_grid,
+       go_grid02 TYPE REF TO cl_gui_alv_grid.
+
+<font color ="#0000FF">*-----------------------------------screen 200------------------------------*</font>
+
+SELECTION-SCREEN BEGIN OF BLOCK bl_opt WITH FRAME TITLE TEXT-009. "첫번째 radio 버튼 블락
+  PARAMETERS: p1 USER-COMMAND radio RADIOBUTTON GROUP cnt1 DEFAULT 'X', "sflight기본선택
+              p2 RADIOBUTTON GROUP cnt1.
+SELECTION-SCREEN END OF BLOCK bl_opt.
+
+SELECTION-SCREEN BEGIN OF BLOCK bl_field WITH FRAME TITLE TEXT-010.
+  SELECT-OPTIONS:so_mid FOR ztmember_b23-mb_id MODIF ID fg .
+  PARAMETERS:    so_mst LIKE ztmember_b23-mb_st MODIF ID fg DEFAULT 'A'.
+  SELECT-OPTIONS:so_rplan FOR ztrent_b23-rplan_dt MODIF ID fg .
+
+  SELECT-OPTIONS:so_mid2 FOR ztmember_b23-mb_id MODIF ID pf .
+SELECTION-SCREEN END OF BLOCK bl_field.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

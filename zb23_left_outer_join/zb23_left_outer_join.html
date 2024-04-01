@@ -1,0 +1,58 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZB23_LEFT_OUTER_JOIN</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZB23_LEFT_OUTER_JOIN</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Program ZB23_LEFT_OUTER_JOIN</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZB23_LEFT_OUTER_JOIN</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT zb23_left_outer_join.
+
+DATA: BEGIN OF gs_join,
+        stuid    TYPE ztstudent_b23-stu_id,
+        fname    TYPE ztstudent_b23-first_name,
+        subnum   TYPE ztclass_b23-sub_num,
+        subgrade TYPE ztclass_b23-sub_grade,
+        semester TYPE ztclass_b23-apply_semester,
+        email    TYPE ztstudent_b23-email,
+      END OF gs_join.
+
+DATA: gt_join LIKE TABLE OF gs_join.
+
+DATA : go_alv_grid TYPE REF TO   cl_salv_table.
+
+SELECT-OPTIONS: so_sid FOR gs_join-stuid.
+
+SELECT ztstudent_b23~stu_id
+  ztstudent_b23~first_name
+  ztclass_b23~sub_num
+  ztclass_b23~sub_grade
+  ztclass_b23~apply_semester
+  ztstudent_b23~email
+  INTO TABLE gt_join
+  FROM ztstudent_b23 LEFT OUTER JOIN ztclass_b23
+  ON ztstudent_b23~stu_id = ztclass_b23~stu_id.
+
+SORT gt_join BY stuid.
+
+cl_salv_table=&gt;factory(
+IMPORTING
+  r_salv_table = go_alv_grid
+  CHANGING
+    t_table = gt_join ).
+
+go_alv_grid-&gt;display( ).
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

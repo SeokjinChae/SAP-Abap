@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZTASK_B23</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZTASK_B23</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  항공 예약 조회 및 탑승객 정보 확인</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZTASK_B23</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT ztask_b23 MESSAGE-ID zb23.
+
+include <a href ="ztask_b23_t01.html">ztask_b23_t01</a>.
+include <a href ="ztask_b23_c01.html">ztask_b23_c01</a>.
+
+include <a href ="ztask_b23_i01.html">ztask_b23_i01</a>.
+include <a href ="ztask_b23_o01.html">ztask_b23_o01</a>.
+include <a href ="ztask_b23_e01.html">ztask_b23_e01</a>.
+include <a href ="ztask_b23_f01.html">ztask_b23_f01</a>.
+
+
+
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& INITIALIZATION : Screen 초기값 설정</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+INITIALIZATION.
+  bt1 = 'OPEN'.
+
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& START-OF-SELECTION : SELECTION-SCREEN의 로직</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+START-OF-SELECTION.
+  PERFORM get_data.
+<font color ="#0000FF">*  PERFORM make_data.</font>
+  PERFORM display_data.
+
+<font color ="#0000FF">*GUI Texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* TITLE_100 --&gt; &1 항공사 예약조회 &2 &3</font>
+<font color ="#0000FF">* TITLE_110 --&gt; &1 예약 항공 정보 조회</font>
+
+<font color ="#0000FF">*Text elements</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* PO1 추가 입력 닫기</font>
+<font color ="#0000FF">* PO2 추가 정보 입력</font>
+
+
+<font color ="#0000FF">*Selection texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* PV_CARID         항공사 ID</font>
+<font color ="#0000FF">* SO_CONID         항공기 연결 번호</font>
+<font color ="#0000FF">* SO_CUSID         고객번호</font>
+<font color ="#0000FF">* SO_FDATE         비행일자</font>
+<font color ="#0000FF">* SO_ODATE         예약일자</font>
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZB23</font>
+<font color ="#0000FF">*001   조건에 만족하는 데이터가 없습니다.</font>
+<font color ="#0000FF">*002   &건의 데이터가 조회되었습니다.</font>
+<font color ="#0000FF">*011</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

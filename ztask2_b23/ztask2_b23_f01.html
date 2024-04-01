@@ -1,0 +1,207 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZTASK2_B23_F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZTASK2_B23_F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZTASK2_B23_F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZTASK2_B23_F01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_data .
+<font color ="#0000FF">*  IF gt_flight IS NOT INITIAL.</font>
+<font color ="#0000FF">*    MESSAGE s002.</font>
+    CALL SCREEN 100.
+<font color ="#0000FF">*  ELSE.</font>
+<font color ="#0000FF">*    MESSAGE s000 WITH TEXT-s01.  "Text symbol과 함께...</font>
+<font color ="#0000FF">*    MESSAGE s001.</font>
+<font color ="#0000FF">*    LEAVE TO LIST-PROCESSING.</font>
+<font color ="#0000FF">*  ENDIF.</font>
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data .
+  SELECT c~carrid c~carrname p~connid p~countryfr p~countryto
+    b~fldate b~customid b~passname b~bookid b~order_date b~smoker b~cancelled
+    INTO CORRESPONDING FIELDS OF TABLE gt_flight
+
+    FROM scarr AS c
+    INNER JOIN spfli AS p
+    ON c~carrid EQ p~carrid
+    INNER JOIN sbook AS b
+    ON p~connid EQ b~connid
+
+    WHERE c~carrid EQ pv_carid
+    AND p~connid IN so_conid
+    AND b~fldate IN so_fdate
+
+    AND b~customid IN so_cusid
+    AND b~order_date IN so_odate.
+
+  IF sy-subrc &lt;&gt; 0.
+    MESSAGE s001.
+    EXIT.
+  ELSE.
+    MESSAGE s002 WITH sy-tfill.
+  ENDIF.
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form make_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM make_data .
+
+ENDFORM.
+
+FORM create_catalog.
+  DATA: lt_fieldcat TYPE kkblo_t_fieldcat.
+
+  CALL FUNCTION 'K_KKB_FIELDCAT_MERGE'
+    EXPORTING
+      i_callback_program     = sy-repid
+      i_tabname              = 'GS_FLIGHT' "필드 카탈로그가 필요한 Structure
+      i_inclname             = sy-repid
+      i_bypassing_buffer     = abap_on
+      i_buffer_active        = abap_off
+    CHANGING
+      ct_fieldcat            = lt_fieldcat
+    EXCEPTIONS
+      inconsistent_interface = 1
+      OTHERS                 = 2.
+
+  IF sy-subrc EQ 0.
+    CALL FUNCTION 'LVC_TRANSFER_FROM_KKBLO'
+      EXPORTING
+        it_fieldcat_kkblo = lt_fieldcat
+      IMPORTING
+        et_fieldcat_lvc   = gt_fieldcat
+      EXCEPTIONS
+        it_data_missing   = 1
+        OTHERS            = 2.
+  ENDIF.
+ENDFORM.
+
+FORM set_catalog.
+
+  DATA ls_fieldcat TYPE lvc_s_fcat.
+
+  LOOP AT gt_fieldcat INTO ls_fieldcat.
+    " STATUS 필드명 + OUPUT 순서 + 정렬
+    IF ls_fieldcat-fieldname = 'STATUS'.
+      ls_fieldcat-coltext = '일정완료여부'.
+      ls_fieldcat-col_pos = 0.
+      ls_fieldcat-just = 'C'. "가운데
+      MODIFY gt_fieldcat FROM ls_fieldcat.
+    ENDIF.
+    " LIGHT 필드명
+    IF ls_fieldcat-fieldname = 'LIGHT'.
+      ls_fieldcat-coltext = '예약상태'.
+      MODIFY gt_fieldcat FROM ls_fieldcat.
+    ENDIF.
+    " CANCELLED 필드 숨김 처리
+    IF ls_fieldcat-fieldname = 'CANCELLED'.
+      ls_fieldcat-no_out = 'X'.
+      MODIFY gt_fieldcat FROM ls_fieldcat.
+    ENDIF.
+    " SMOKER 필드 체크박스 + OUTPUT 순서
+    IF ls_fieldcat-fieldname = 'SMOKER'.
+      ls_fieldcat-checkbox = 'X'.
+      ls_fieldcat-col_pos = 8.
+      MODIFY gt_fieldcat FROM ls_fieldcat.
+    ENDIF.
+    " BOOKID 필드 HOTSPOT 이벤트
+    IF ls_fieldcat-fieldname = 'BOOKID'.
+      ls_fieldcat-hotspot = 'X'.
+      MODIFY gt_fieldcat FROM ls_fieldcat.
+    ENDIF.
+  ENDLOOP.
+
+ENDFORM.
+
+FORM create_obj.
+      "1. custom control area 에 container 를 link
+    CREATE OBJECT go_cont   "constructor method 가 호출
+      EXPORTING
+        container_name = 'MY_CONTROL_AREA'
+      EXCEPTIONS
+        OTHERS         = 1.
+
+    IF sy-subrc &lt;&gt; 0.
+
+    ENDIF.
+
+    "2. container 에 grid 를 link.
+    CREATE OBJECT go_grid
+      EXPORTING
+        i_parent = go_cont
+      EXCEPTIONS
+        OTHERS   = 1.
+
+    IF sy-subrc &lt;&gt; 0.
+
+    ENDIF.
+ENDFORM.
+
+
+
+FORM display_grid.
+  CALL METHOD go_grid-&gt;set_table_for_first_display
+      EXPORTING
+<font color ="#0000FF">*        i_buffer_active               =</font>
+<font color ="#0000FF">*        i_bypassing_buffer            =</font>
+<font color ="#0000FF">*        i_consistency_check           =</font>
+<font color ="#0000FF">*         i_structure_name              = 'SFLIGHT'</font>
+<font color ="#0000FF">*        is_variant                    =</font>
+<font color ="#0000FF">*        i_save                        =</font>
+<font color ="#0000FF">*        i_default                     = 'X'</font>
+         is_layout                     = gs_layout
+<font color ="#0000FF">*        is_print                      =</font>
+<font color ="#0000FF">*        it_special_groups             =</font>
+<font color ="#0000FF">*        it_toolbar_excluding          =</font>
+<font color ="#0000FF">*        it_hyperlink                  =</font>
+<font color ="#0000FF">*        it_alv_graphics               =</font>
+<font color ="#0000FF">*        it_except_qinfo               =</font>
+<font color ="#0000FF">*        ir_salv_adapter               =</font>
+      CHANGING
+         it_outtab                     = gt_flight
+         it_fieldcatalog               = gt_fieldcat
+<font color ="#0000FF">*        it_sort                       =</font>
+<font color ="#0000FF">*        it_filter                     =</font>
+<font color ="#0000FF">*      EXCEPTIONS</font>
+<font color ="#0000FF">*        invalid_parameter_combination = 1</font>
+<font color ="#0000FF">*        program_error                 = 2</font>
+<font color ="#0000FF">*        too_many_lines                = 3</font>
+<font color ="#0000FF">*        others                        = 4</font>
+            .
+    IF sy-subrc &lt;&gt; 0.
+<font color ="#0000FF">*     Implement suitable error handling here</font>
+    ENDIF.
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>
